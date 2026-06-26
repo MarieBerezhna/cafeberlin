@@ -392,15 +392,14 @@ const UNIQUE_PRICES = [...new Set(ALL_PRICES_FLAT)];
 const CATS = ["Todo",...[...new Set(RAW.map(x=>x.cat))]];
 const FILTER_TYPES = ["ingredients","price","category","name"];
 const FILTER_LABELS    = {ingredients:"Ingredientes",price:"Precio",category:"Categoría",name:"Nombre"};
-const FILTER_LABELS_EN = {ingredients:"Ingredients",price:"Price",category:"Category",name:"Name"};
 const Q_META = {
-  ingredients:  {l:"¿Qué lleva?"},
-  ingredients2: {l:"¿Cuál más?"},
-  ingredients3: {l:"¿Cuál NO lleva?"},
-  price:        {l:"Precio exacto"},
-  ratio:        {l:"Ratio"},
-  category:     {l:"Categoría"},
-  name:         {l:"Nombre"},
+  ingredients:  "¿Qué lleva?",
+  ingredients2: "¿Cuál más?",
+  ingredients3: "¿Cuál NO lleva?",
+  price:        "Precio exacto",
+  ratio:        "Ratio",
+  category:     "Categoría",
+  name:         "Nombre",
 };
 
 let activeTab="Coctelería clásica", activeFilters=new Set(FILTER_TYPES);
@@ -556,7 +555,7 @@ function buildTabs(){
 }
 function buildFilters(){
   const btns=FILTER_TYPES.map(t=>
-    `<button class="filt${activeFilters.has(t)?" on":""}" onclick="toggleFilter('${t}')">${FILTER_LABELS[t]} / ${FILTER_LABELS_EN[t]}</button>`
+    `<button class="filt${activeFilters.has(t)?" on":""}" onclick="toggleFilter('${t}')">${FILTER_LABELS[t]}</button>`
   ).join("");
   document.getElementById("filters").innerHTML=`<span class="filter-label">🔍 Tipo:</span>${btns}`;
 }
@@ -582,7 +581,7 @@ function render(){
   const imgHtml = q.img ? ['<img class="qimg" src="', q.img, '" alt="">'].join('') : '';
   document.getElementById("area").innerHTML=`
     <div class="qcard">
-      <div class="qtype">${m.l} / ${m.e}<span class="qtag">${q.cat}</span></div>
+      <div class="qtype">${m}<span class="qtag">${q.cat}</span></div>
       ${imgHtml}
       <div class="qtext">${q.q}</div>
       <div class="${q.opts.some(o=>IMAGES[o])?'opts-img':'opts'}" id="optsdiv">
@@ -651,7 +650,6 @@ function setMode(m){
 }
 
 // ── LEARN MODE ────────────────────────────────────────────
-const COCKTAILS_WITH_INGR = RAW.filter(x=>x.hasIngr && x.ingr && x.ingr.length>1);
 let learnQueue = [], learnIdx = 0;
 let learnStage = 'main';   // 'main' (study+quiz per item) | 'recall' (final review of all)
 let learnPhase = 'study';  // for 'main': 'study' | 'quiz'
@@ -862,7 +860,7 @@ function renderLearnQuiz(item){
   document.getElementById('area').innerHTML = `
     <div class="learn-card">
       <div class="learn-counter">Práctica · ${learnIdx+1} / ${learnQueue.length}${quizQueue.length>1?` · ${quizQueueIdx+1}/${quizQueue.length}`:''}</div>
-      <div class="qtype">${Q_META[q.qtype].l} / ${Q_META[q.qtype].e}<span class="qtag">${item.name}</span></div>
+      <div class="qtype">${Q_META[q.qtype]}<span class="qtag">${item.name}</span></div>
       <div class="qtext">${q.q}</div>
       <div class="${optsClass}">${optsHtml}</div>
       <div class="fb" id="fb"></div>
