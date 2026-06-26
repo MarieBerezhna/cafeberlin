@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Café Berlín Quiz</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;padding:1rem;background:#0f0e0c;color:#e8e6e1}
+.wrap{max-width:700px;margin:0 auto;padding:1rem 0}
+h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#e8e6e1}
+.tabs-scroll{overflow-x:auto;padding-bottom:4px;margin-bottom:1rem}
+.tabs{display:flex;gap:4px;width:max-content;background:#1e1d1a;border-radius:10px;padding:4px}
+.tab{padding:6px 12px;border-radius:7px;border:none;background:transparent;font-size:13px;color:#7a7875;cursor:pointer;white-space:nowrap}
+.tab:hover{color:#e8e6e1}
+.tab.active{background:#2a2926;color:#e8e6e1;font-weight:500;border:0.5px solid rgba(232,230,225,0.15)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem;align-items:center}
+.filter-label{font-size:12px;color:#7a7875;margin-right:2px}
+.filt{padding:4px 10px;border-radius:20px;border:0.5px solid rgba(232,230,225,0.25);background:transparent;font-size:12px;color:#7a7875;cursor:pointer}
+.filt.on{background:#e8e6e1;color:#0f0e0c;border-color:#e8e6e1}
+.pbar{height:3px;background:#1e1d1a;border-radius:2px;margin-bottom:1rem}
+.pfill{height:3px;background:#e8e6e1;border-radius:2px;transition:width .4s}
+.meta{display:flex;gap:8px;margin-bottom:1rem}
+.mc{flex:1;background:#1e1d1a;border-radius:8px;padding:10px;text-align:center}
+.ml{font-size:11px;color:#7a7875}
+.mv{font-size:20px;font-weight:500;color:#e8e6e1}
+.qcard{background:#1a1917;border:0.5px solid rgba(232,230,225,0.1);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.qtype{font-size:11px;font-weight:500;color:#7a7875;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.qtag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:20px;background:#2a2926;color:#7a7875;margin-left:6px;font-weight:400;text-transform:none;letter-spacing:0}
+.qtext{font-size:16px;font-weight:500;line-height:1.5;margin-bottom:3px;color:#e8e6e1}
+.qtrans{font-size:13px;color:#7a7875;font-style:italic;margin-bottom:1rem}
+.opts{display:grid;gap:7px}
+.ob{text-align:center;background:#232220;border:0.5px solid rgba(232,230,225,0.1);border-radius:8px;padding:9px 13px;font-size:14px;cursor:pointer;color:#e8e6e1}
+.ob:hover:not(:disabled){background:#2a2926;border-color:rgba(232,230,225,0.3)}
+.ob:disabled{cursor:default}
+.ob.ok{background:#1a3010;border-color:#4a8020;color:#97c459}
+.ob.bad{background:#2e1010;border-color:#8b2020;color:#e07070}
+.fb{margin-top:10px;font-size:13px;color:#7a7875;border-top:0.5px solid rgba(232,230,225,0.1);padding-top:10px;line-height:1.6;display:none}
+.fb strong{color:#e8e6e1}
+.nav{display:flex;gap:8px;margin-top:10px}
+.nav button{flex:1;padding:9px;border:0.5px solid rgba(232,230,225,0.25);border-radius:8px;background:transparent;font-size:14px;cursor:pointer;color:#e8e6e1}
+.nav button:hover{background:#2a2926}
+.nav button.pri{background:#e8e6e1;color:#0f0e0c;border-color:#e8e6e1}
+.nav button.pri:hover{background:#c8c6c1}
+.end{text-align:center;padding:2rem 1rem}
+.end .big{font-size:44px;margin-bottom:8px}
+.end .sc{font-size:28px;font-weight:500;margin-bottom:8px;color:#e8e6e1}
+.end p{color:#7a7875;font-size:14px;line-height:1.6}
+.no-q{padding:2rem;text-align:center;color:#7a7875;font-size:14px}
+.mode-switch{display:flex;gap:4px;background:#1f1e1b;border-radius:8px;padding:3px}
+.mode-btn{padding:5px 14px;border-radius:6px;border:none;background:transparent;font-size:13px;color:#9a9793;cursor:pointer;transition:all .15s}
+.mode-btn.active{background:#2a2926;color:#e8e6e1;font-weight:500}
+.learn-card{background:#1f1e1b;border:0.5px solid rgba(232,230,225,0.12);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.learn-name{font-size:20px;font-weight:600;color:#e8e6e1;margin-bottom:1rem;text-align:center}
+.learn-price{font-size:14px;font-weight:600;color:#E0AE6B}
+.learn-ingr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:1rem}
+.learn-ingr-item{display:flex;flex-direction:column;align-items:center;gap:6px;background:#2a2926;border-radius:8px;padding:10px 8px;font-size:12px;color:#e8e6e1;text-align:center}
+.learn-ingr-item img{width:60px;height:60px;object-fit:cover;border-radius:6px}
+.learn-ingr-item.no-img{justify-content:center;min-height:40px}
+.ingr-group{margin-bottom:14px}
+.ingr-row{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.ingr-row .ingr-group{flex:1;min-width:140px;margin-bottom:0}
+.ingr-group-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;opacity:.85}
+.ingr-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+/* group color themes — border more saturated than background */
+.grp-spirit .ingr-group-label{color:#F09595}
+.grp-spirit .learn-ingr-item,.recall-opt.grp-spirit{background:#3a1414;border:1.5px solid #C24343}
+.grp-liqueur .ingr-group-label{color:#E0AE6B}
+.grp-liqueur .learn-ingr-item,.recall-opt.grp-liqueur{background:#3a2810;border:1.5px solid #C5852E}
+.grp-filler .ingr-group-label{color:#8FC1E0}
+.grp-filler .learn-ingr-item,.recall-opt.grp-filler{background:#10262f;border:1.5px solid #2E86B8}
+.grp-bitter .ingr-group-label{color:#C9A0DC}
+.grp-bitter .learn-ingr-item,.recall-opt.grp-bitter{background:#2a1830;border:1.5px solid #8A4FA8}
+.grp-sweet .ingr-group-label{color:#9ECB7A}
+.grp-sweet .learn-ingr-item,.recall-opt.grp-sweet{background:#16290f;border:1.5px solid #4F8C2E}
+.grp-other .ingr-group-label{color:#9a9793}
+.grp-other .learn-ingr-item,.recall-opt.grp-other{background:#26241f;border:1.5px solid #5a5650}
+/* selection/result states must override group color */
+.recall-opt.selected{border-color:#639922 !important;background:#1a3a08 !important}
+.recall-opt.correct{background:#27500A !important;border-color:#97C459 !important;color:#C0DD97}
+.recall-opt.missed{background:#4a2800 !important;border-color:#c87020 !important;color:#f0a060}
+.recall-opt.wrong{background:#791F1F !important;border-color:#F09595 !important;color:#F7C1C1}
+.recall-opt{display:flex;flex-direction:column;align-items:center;gap:6px;background:#2a2926;border:0.5px solid rgba(232,230,225,0.12);border-radius:8px;padding:10px 8px;font-size:12px;color:#e8e6e1;text-align:center;cursor:pointer;transition:all .15s}
+.recall-opt img{width:60px;height:60px;object-fit:cover;border-radius:6px}
+.recall-opt:disabled,.recall-opt[data-locked]{cursor:default}
+.learn-hint{font-size:12px;color:#9a9793;text-align:center;margin-bottom:.75rem}
+.learn-counter{font-size:13px;color:#9a9793;text-align:center;margin-bottom:1rem}
+.opts-img{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ob-img{display:flex;flex-direction:column;align-items:center;gap:8px;background:#2a2926;border:0.5px solid rgba(232,230,225,0.12);border-radius:8px;padding:10px;font-size:13px;cursor:pointer;color:#e8e6e1;text-align:center}
+.ob-img:hover:not(:disabled){background:#333230;border-color:rgba(232,230,225,0.35)}
+.ob-img:disabled{cursor:default}
+.ob-img img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px}
+.ob-img.ok{background:#27500A;border-color:#97C459;color:#C0DD97}
+.ob-img.bad{background:#791F1F;border-color:#F09595;color:#F7C1C1}
+.qimg{display:block;max-height:140px;max-width:160px;object-fit:contain;border-radius:8px;margin:0 auto 1rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    <h1>🍸 Café Berlín</h1>
+    <div style="display:flex;gap:6px;align-items:center">
+      <div class="mode-switch" id="langSwitch">
+        <button class="mode-btn active" id="btnES" onclick="setLang('es')">🇪🇸 ES</button>
+        <button class="mode-btn" id="btnEN" onclick="setLang('en')">🇬🇧 EN</button>
+      </div>
+      <div class="mode-switch" id="modeSwitch">
+        <button class="mode-btn" id="btnTest" onclick="setMode('test')">🎯 Test</button>
+        <button class="mode-btn active" id="btnLearn" onclick="setMode('learn')">📖 Aprender</button>
+      </div>
+    </div>
+  </div>
+  <div class="tabs-scroll"><div class="tabs" id="tabs"></div></div>
+  <div class="filters" id="filters"></div>
+  <div class="pbar"><div class="pfill" id="prog" style="width:0%"></div></div>
+  <div class="meta" id="metaBar">
+    <div class="mc"><div class="ml">Question</div><div class="mv" id="qnum">–</div></div>
+    <div class="mc"><div class="ml">Correct</div><div class="mv" id="qok">0</div></div>
+    <div class="mc"><div class="ml">Score</div><div class="mv" id="qpct">–</div></div>
+  </div>
+  <div id="area"></div>
+</div>
+<script>
+// prices: array of {label_es, label_en, price} — one entry per serving format
+const RAW = [
+  {cat:"Coctelería clásica",name:"Mojito",hasIngr:true,
+   ingr:["Hierbabuena","Ron blanco","Zumo de lima","Azúcar líquido","Soda"],
+   doses:{"Ron blanco":"1 oz","Zumo de lima":"1 oz","Azúcar líquido":"1 oz"},
+   method_es:"Removido", method_en:"Stir",
+   glass_es:"Collins (tubo)", glass_en:"Collins (tube)",
+   prices:[{es:"cóctel",en:"cocktail",p:11}]},
+  {cat:"Cócteles – Acid Times",name:"Blue Margarita",hasIngr:true,ingr:["Tequila","Licor Bols Blue Curaçao","Sirope de agave","Zumo de lima"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Acid Times",name:"Brote Primera",hasIngr:true,ingr:["Gin Tanqueray","Licor yuzu","Azúcar líquido","Lima","Albahaca"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Acid Times",name:"Berlin Lemonade",hasIngr:true,ingr:["Jack Daniels Triple Mash","Triple Sec Bols","7UP","Jalea de naranja","Lima"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Acid Times",name:"Corazón de Luna",hasIngr:true,ingr:["Tequila","Triple Sec Bols","Lima","Lichee"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Acid Times",name:"Berlín Green",hasIngr:true,ingr:["Vodka","Licor Midori","Albahaca","Manzana verde","Fruta de la pasión"],
+   prices:[{es:"cóctel",en:"cocktail",p:13}]},
+  {cat:"Cócteles – Sweet Times",name:"Porn Star Martini",hasIngr:true,ingr:["Moskovskaya","Licor de vainilla Bols","Puré de fruta de la pasión","Zumo de lima","Foam"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Sweet Times",name:"Éxodo",hasIngr:true,ingr:["Bumbu","Bitter caffè","Sirope pandán","Coco","Café"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Sweet Times",name:"Rubedo",hasIngr:true,ingr:["Gin","Vermut","Agave","Lima","Arándanos","Fresa"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Sweet Times",name:"Génesis",hasIngr:true,ingr:["Ron","Ginger Ale","Azúcar líquido","Lima","Calabaza asada","Naranja"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Sweet Times",name:"Ámbar con cacao",hasIngr:true,ingr:["Ron","Licor Bols Chocolate","Licor Bols Mantequilla","Sirope de vainilla"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Sweet Times",name:"Diego",hasIngr:true,ingr:["Jack Daniels Fire","Licor Bols Yogurt","Licor Bols Mantequilla","Sirope amarena","Zumo de arándanos"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Spicy Times",name:"Bloody Mary",hasIngr:true,ingr:["Moskovskaya","Zumo de tomate","Mix casero"],
+   prices:[{es:"cóctel",en:"cocktail",p:11}]},
+  {cat:"Cócteles – Spicy Times",name:"Moscow Mule",hasIngr:true,ingr:["Moskovskaya","Ginger beer","Zumo de lima"],
+   prices:[{es:"cóctel",en:"cocktail",p:11}]},
+  {cat:"Cócteles – Spicy Times",name:"Paloma Don Julio",hasIngr:true,ingr:["Tequila Don Julio","Soda de pomelo","Agave","Lima"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Spicy Times",name:"Matarreyes",hasIngr:true,ingr:["Vodka Smirnoff Tamarindo","Licor de humo","Triple Sec Bols","Agave","Lima","Maracuyá"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Hard Times",name:"Hombro al sol",hasIngr:true,ingr:["Monkey Shoulder","Fino","Bitter de naranja"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Hard Times",name:"Polvo de calima",hasIngr:true,ingr:["Diplomático Planas","Ron jamaicano","Chambord","Zumo de naranja","Zumo de piña","Sirope falernum","Zumo de lima"],
+   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+  {cat:"Cócteles – Hard Times",name:"Berlin Sling",hasIngr:true,ingr:["Gin Mare","Chambord","Bénédictine DOM","Triple Sec Bols","Piña","Lima"],
+   prices:[{es:"cóctel",en:"cocktail",p:12},{es:"cóctel con chupito de vodka",en:"cocktail with vodka shot",p:13}]},
+  {cat:"Café Cócteles",name:"Espresso Martini",hasIngr:true,ingr:["Moskovskaya","Licor de café Bols","Bitter de cacao","Sirope de vainilla","Café"],
+   prices:[{es:"cóctel",en:"cocktail",p:11}]},
+  {cat:"Café Cócteles",name:"White Russian",hasIngr:true,ingr:["Vodka","Licor de café","Leche","Nata"],
+   prices:[{es:"cóctel",en:"cocktail",p:11}]},
+  {cat:"Sin Alcohol",name:"Virgin Mai Tai",hasIngr:true,ingr:["Sirope","Frutas tropicales"],
+   prices:[{es:"sin alcohol",en:"non-alcoholic",p:8},{es:"con alcohol",en:"with alcohol",p:12}]},
+  {cat:"Sin Alcohol",name:"Gin Fizz 0.0",hasIngr:true,ingr:["Tanqueray 0.0","Soda","Lima"],
+   prices:[{es:"cóctel",en:"cocktail",p:9}]},
+  {cat:"Sin Alcohol",name:"Virgin Lady",hasIngr:true,ingr:["Tanqueray 0.0","Frutos rojos","Lima"],
+   prices:[{es:"cóctel",en:"cocktail",p:9}]},
+  {cat:"Spritz",name:"Hugo Spritz",hasIngr:true,ingr:["Bols Saúco","Cava","Soda","Hierbabuena"],
+   prices:[{es:"copa",en:"glass",p:10}]},
+  {cat:"Spritz",name:"Aperol Spritz",hasIngr:true,ingr:["Aperol","Cava","Soda"],
+   prices:[{es:"copa",en:"glass",p:8}]},
+  {cat:"Spritz",name:"Yuzu Spritz",hasIngr:true,ingr:["Licor yuzu","Cava","Soda"],
+   prices:[{es:"copa",en:"glass",p:8}]},
+  {cat:"Spritz",name:"Chambord Spritz",hasIngr:true,ingr:["Chambord","Cava","Soda"],
+   prices:[{es:"copa",en:"glass",p:8}]},
+  {cat:"Spritz",name:"Campari Spritz",hasIngr:true,ingr:["Campari","Cava","Soda"],
+   prices:[{es:"copa",en:"glass",p:8}]},
+  {cat:"Spritz",name:"Sarti Rosa Spritz",hasIngr:true,ingr:["Sarti Rosa","Cava","Soda"],
+   prices:[{es:"copa",en:"glass",p:8}]},
+  {cat:"Jarras",name:"Agua de Valencia",hasIngr:true,ingr:["Gin Tanqueray","Triple Sec Bols","Licor mandarina MB","Cava","Zumo de naranja","Azúcar líquido"],
+   prices:[{es:"copa",en:"glass",p:7}]},
+  {cat:"Jarras",name:"Sangría",hasIngr:true,ingr:["Diplomático Planas","Vino tinto","Triple Sec Bols","Terry","Vermut tinto","Zumo de naranja","Azúcar líquido"],
+   prices:[{es:"copa",en:"glass",p:7}]},
+  {cat:"Jarras",name:"Tinto de verano",hasIngr:true,ingr:["Vino tinto","Schweppes limón","Zumo de limón"],
+   prices:[{es:"copa",en:"glass",p:5}]},
+  {cat:"Ron",name:"Barceló Añejo",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:9.5},{es:"chupito",en:"shot",p:3}]},
+  {cat:"Ron",name:"Barceló Imperial",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:12},{es:"chupito",en:"shot",p:6}]},
+  {cat:"Ron",name:"Diplomático Planas",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"chupito",en:"shot",p:6}]},
+  {cat:"Ron",name:"Zacapa Centenario 23",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:16},{es:"chupito",en:"shot",p:8}]},
+  {cat:"Whisky",name:"Johnnie Walker Red Label",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:9},{es:"doble",en:"double",p:12},{es:"chupito",en:"shot",p:3}]},
+  {cat:"Whisky",name:"Johnnie Walker Black Label 12Y",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:12},{es:"doble",en:"double",p:16},{es:"chupito",en:"shot",p:6}]},
+  {cat:"Whisky",name:"Tullamore Dew",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:9},{es:"doble",en:"double",p:12},{es:"chupito",en:"shot",p:4}]},
+  {cat:"Whisky",name:"Jack Daniels Old Nº7",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:9},{es:"doble",en:"double",p:14},{es:"chupito",en:"shot",p:5}]},
+  {cat:"Whisky",name:"Bulleit Frontier Bourbon",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:12},{es:"doble",en:"double",p:16},{es:"chupito",en:"shot",p:6}]},
+  {cat:"Whisky",name:"Monkey Shoulder",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:12},{es:"doble",en:"double",p:16},{es:"chupito",en:"shot",p:6}]},
+  {cat:"Whisky",name:"Toki",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"doble",en:"double",p:18},{es:"chupito",en:"shot",p:5}]},
+  {cat:"Whisky",name:"Bushmills",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"doble",en:"double",p:18},{es:"chupito",en:"shot",p:5}]},
+  {cat:"Whisky",name:"Tomatin",hasIngr:false,
+   prices:[{es:"solo",en:"neat",p:12},{es:"doble",en:"double",p:20},{es:"chupito",en:"shot",p:6}]},
+  {cat:"Whisky",name:"Macallan",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:16}]},
+  {cat:"Gin",name:"Tanqueray London Dry",hasIngr:false,
+   prices:[{es:"solo",en:"neat",p:9.5}]},
+  {cat:"Gin",name:"Tanqueray Nº Ten",hasIngr:false,
+   prices:[{es:"solo",en:"neat",p:14}]},
+  {cat:"Gin",name:"Tanqueray 0.0",hasIngr:false,
+   prices:[{es:"solo",en:"neat",p:10}]},
+  {cat:"Gin",name:"Gin Mare",hasIngr:false,
+   prices:[{es:"solo",en:"neat",p:12}]},
+  {cat:"Gin",name:"Fords",hasIngr:false,
+   prices:[{es:"solo",en:"neat",p:12}]},
+  {cat:"Gin",name:"Larios 12",hasIngr:false,
+   prices:[{es:"solo",en:"neat",p:12}]},
+  {cat:"Gin",name:"Larios Rose",hasIngr:false,
+   prices:[{es:"solo",en:"neat",p:10}]},
+  {cat:"Gin",name:"Roku",hasIngr:false,
+   prices:[{es:"solo",en:"neat",p:12}]},
+  {cat:"Gin",name:"Hendrick's",hasIngr:false,
+   prices:[{es:"solo",en:"neat",p:13}]},
+  {cat:"Gin",name:"Macaronesia",hasIngr:false,
+   prices:[{es:"solo",en:"neat",p:9.5}]},
+  {cat:"Tequila",name:"Rooster Rojo White",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"chupito",en:"shot",p:4}]},
+  {cat:"Tequila",name:"Mezcal Union",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:12},{es:"chupito",en:"shot",p:5}]},
+  {cat:"Tequila",name:"Don Julio Silver",hasIngr:false,img:'data:image/jpeg;base64,$B64',
+   prices:[{es:"combinado",en:"mixed drink",p:18},{es:"chupito",en:"shot",p:10}]},
+  {cat:"Tequila",name:"Don Julio Reposado",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:18},{es:"chupito",en:"shot",p:10}]},
+  {cat:"Vodka",name:"Moskovskaya",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:9.5},{es:"chupito",en:"shot",p:3}]},
+  {cat:"Vodka",name:"Cîroc",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:14},{es:"chupito",en:"shot",p:7}]},
+  {cat:"Vodka",name:"Beluga",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:16},{es:"chupito",en:"shot",p:9}]},
+  {cat:"Licores",name:"Jack Fire",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:9},{es:"chupito",en:"shot",p:5}]},
+  {cat:"Licores",name:"Jägermeister",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"copa",en:"glass",p:8},{es:"chupito",en:"shot",p:3}]},
+  {cat:"Licores",name:"Licor de arroz",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:6},{es:"chupito",en:"shot",p:3}]},
+  {cat:"Licores",name:"Limoncello",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:6},{es:"chupito",en:"shot",p:3}]},
+  {cat:"Licores",name:"Cazalla",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:6},{es:"chupito",en:"shot",p:3}]},
+  {cat:"Licores",name:"Amaretto",hasIngr:false,
+   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"copa",en:"glass",p:8},{es:"chupito",en:"shot",p:3}]},
+  {cat:"Licores",name:"Baileys",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:6},{es:"chupito",en:"shot",p:3}]},
+  {cat:"Vermut",name:"Vittore Rojo",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:4}]},
+  {cat:"Vermut",name:"Vittore Blanco",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:4}]},
+  {cat:"Vermut",name:"Martini Reserva Ambrato",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:5}]},
+  {cat:"Vermut",name:"Martini Reserva Rubino",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:5}]},
+  {cat:"Vermut",name:"Noilly Prat Blanco Seco",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:5}]},
+  {cat:"Vino",name:"Ovejita verde Verdejo",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:4},{es:"botella",en:"bottle",p:20}]},
+  {cat:"Vino",name:"Ladrón de Lunas Blanco",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:4},{es:"botella",en:"bottle",p:20}]},
+  {cat:"Vino",name:"Ovejita Tinto",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:4},{es:"botella",en:"bottle",p:20}]},
+  {cat:"Vino",name:"Brut Cava",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:5},{es:"botella",en:"bottle",p:25}]},
+  {cat:"Vino",name:"Bollinger Spécial Cuvée",hasIngr:false,
+   prices:[{es:"botella",en:"bottle",p:100}]},
+  {cat:"Vino",name:"Ramón Bilbao Rioja",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:5},{es:"botella",en:"bottle",p:25}]},
+  {cat:"Vino",name:"Vento n°1",hasIngr:false,
+   prices:[{es:"copa",en:"glass",p:4.5},{es:"botella",en:"bottle",p:25}]},
+  {cat:"Cerveza",name:"Águila",hasIngr:false,
+   prices:[{es:"pinta",en:"pint",p:5.3},{es:"doble",en:"half pint",p:3.7}]},
+  {cat:"Cerveza",name:"Águila Sin Filtrar",hasIngr:false,
+   prices:[{es:"pinta",en:"pint",p:5.5},{es:"doble",en:"half pint",p:4}]},
+  {cat:"Cerveza",name:"18/70",hasIngr:false,
+   prices:[{es:"tercio",en:"bottle (33cl)",p:3.7}]},
+  {cat:"Cerveza",name:"Amstel 0.0",hasIngr:false,
+   prices:[{es:"tercio",en:"bottle (33cl)",p:3.5}]},
+  {cat:"Cerveza",name:"Amstel Radler",hasIngr:false,
+   prices:[{es:"tercio",en:"bottle (33cl)",p:3.5}]},
+  {cat:"Cerveza",name:"Cruzcampo Sin Gluten",hasIngr:false,
+   prices:[{es:"tercio",en:"bottle (33cl)",p:4}]},
+  {cat:"Cerveza",name:"Paulaner",hasIngr:false,
+   prices:[{es:"pinta",en:"pint",p:5.5},{es:"doble",en:"half pint",p:4}]},
+  {cat:"Cerveza",name:"IPA Lagunitas",hasIngr:false,
+   prices:[{es:"botella",en:"bottle",p:5.5}]},
+  {cat:"Cerveza",name:"Guinness",hasIngr:false,
+   prices:[{es:"pinta",en:"pint",p:5.5}]},
+  {cat:"Cerveza",name:"Heineken",hasIngr:false,
+   prices:[{es:"tercio",en:"bottle (33cl)",p:3.5}]},
+  {cat:"Micheladas",name:"Michelada Berlín",hasIngr:true,ingr:["Cerveza","Zumo de limón","Sal","Salsa inglesa","Tabasco"],
+   prices:[{es:"500 ml",en:"500 ml",p:8}]},
+  {cat:"Micheladas",name:"Michelada de Tequila",hasIngr:true,ingr:["Cerveza","Tequila","Bitter habanero","Zumo de limón","Sal"],
+   prices:[{es:"500 ml",en:"500 ml",p:9}]},
+  {cat:"Comida",name:"Patatas bolsa",hasIngr:false,
+   prices:[{es:"ración",en:"serving",p:1.5}]},
+  {cat:"Comida",name:"Aceitunas",hasIngr:false,
+   prices:[{es:"ración",en:"serving",p:2}]},
+  {cat:"Comida",name:"Tabla de jamón Gargallo",hasIngr:false,
+   prices:[{es:"tabla",en:"board",p:12}]},
+  {cat:"Refrescos",name:"Pepsi",hasIngr:false,
+   prices:[{es:"lata/botella",en:"can/bottle",p:3}]},
+  {cat:"Refrescos",name:"Pepsi Zero",hasIngr:false,
+   prices:[{es:"lata/botella",en:"can/bottle",p:3}]},
+  {cat:"Refrescos",name:"Schweppes Limón",hasIngr:false,
+   prices:[{es:"lata/botella",en:"can/bottle",p:3}]},
+  {cat:"Refrescos",name:"Tónica Schweppes",hasIngr:false,
+   prices:[{es:"lata/botella",en:"can/bottle",p:3}]},
+  {cat:"Refrescos",name:"Ginger Beer",hasIngr:false,
+   prices:[{es:"botella",en:"bottle",p:3.5}]},
+  {cat:"Refrescos",name:"Red Bull",hasIngr:false,
+   prices:[{es:"lata",en:"can",p:3.5}]},
+  {cat:"Refrescos",name:"Agua Lanjarón",hasIngr:false,
+   prices:[{es:"botella",en:"bottle",p:3}]},
+  {cat:"Refrescos",name:"Agua con gas Perrier",hasIngr:false,
+   prices:[{es:"botella",en:"bottle",p:3}]},
+];
+
+const IMAGES = {
+  "Licores": "https://marieberezhna.github.io/cafeberlin/liqueurs/licores.webp",
+  "Licor de arroz": "https://marieberezhna.github.io/cafeberlin/liqueurs/licor_de_arroz.webp",
+  "Jägermeister": "https://marieberezhna.github.io/cafeberlin/liqueurs/jagermeister.webp",
+  "Jack Fire": "https://marieberezhna.github.io/cafeberlin/liqueurs/jack_fire.webp",
+  "Cazalla": "https://marieberezhna.github.io/cafeberlin/liqueurs/cazalla.webp",
+  "Baileys": "https://marieberezhna.github.io/cafeberlin/liqueurs/baileys.webp",
+  "Amaretto": "https://marieberezhna.github.io/cafeberlin/liqueurs/amaretto.webp",
+  "Limoncello": "https://marieberezhna.github.io/cafeberlin/liqueurs/Limoncello.webp",
+  "Vittore Rojo": "https://marieberezhna.github.io/cafeberlin/vermouth/vittore_rojo.webp",
+  "Vittore Blanco": "https://marieberezhna.github.io/cafeberlin/vermouth/vittore_blanco.webp",
+  "Vermut": "https://marieberezhna.github.io/cafeberlin/vermouth/vermut.webp",
+  "Noilly Prat Blanco Seco": "https://marieberezhna.github.io/cafeberlin/vermouth/nolly_prat_blanco_seco.webp",
+  "Martini Reserva Rubino": "https://marieberezhna.github.io/cafeberlin/vermouth/martini_reserva_rubino.webp",
+  "Martini Reserva Ambrato": "https://marieberezhna.github.io/cafeberlin/vermouth/martini_reserva_ambrato.webp",
+  "Agua con gas Perrier": "https://marieberezhna.github.io/cafeberlin/refrescos/perrier.webp",
+  "Vino blanco": "https://marieberezhna.github.io/cafeberlin/wine/vino_blanco.webp",
+  "Vino": "https://marieberezhna.github.io/cafeberlin/wine/vinos.webp",
+  "Ramón Bilbao Rioja": "https://marieberezhna.github.io/cafeberlin/wine/ramon_bilbao_rioja.webp",
+  "Bollinger Spécial Cuvée": "https://marieberezhna.github.io/cafeberlin/wine/bollinger_special_cuvee.webp",
+  "Pepsi": "https://marieberezhna.github.io/cafeberlin/refrescos/pepsi.webp",
+  "Pepsi Zero": "https://marieberezhna.github.io/cafeberlin/refrescos/pepsi_zero.webp",
+  "Red Bull": "https://marieberezhna.github.io/cafeberlin/refrescos/red_bull.webp",
+  "Tónica Schweppes": "https://marieberezhna.github.io/cafeberlin/refrescos/tonica_schweppes.webp",
+  "Agua Lanjarón": "https://marieberezhna.github.io/cafeberlin/refrescos/lanjaron.webp",
+  "Schweppes Limón": "https://marieberezhna.github.io/cafeberlin/refrescos/schweppes_limon.webp",
+  "Schweppes limón": "https://marieberezhna.github.io/cafeberlin/refrescos/schweppes_limon.webp",
+  "Vino tinto": "https://marieberezhna.github.io/cafeberlin/wine/vino_tinto.webp",
+  "Guinness": "https://marieberezhna.github.io/cafeberlin/beer/guinness.webp",
+  "Cerveza": "https://marieberezhna.github.io/cafeberlin/beer/beer.webp",
+  "Paulaner": "https://marieberezhna.github.io/cafeberlin/beer/paulaner.webp",
+  "Águila": "https://marieberezhna.github.io/cafeberlin/beer/aguila.webp",
+  "Águila Sin Filtrar": "https://marieberezhna.github.io/cafeberlin/beer/aquila_sin_filtrar.webp",
+  "18/70": "https://marieberezhna.github.io/cafeberlin/beer/1870.webp",
+  "Amstel 0.0": "https://marieberezhna.github.io/cafeberlin/beer/amstel00.webp",
+  "Amstel Radler": "https://marieberezhna.github.io/cafeberlin/beer/amstel_radler.webp",
+  "Cruzcampo Sin Gluten": "https://marieberezhna.github.io/cafeberlin/beer/cruzcampo_sin_gluten.webp",
+  "IPA Lagunitas": "https://marieberezhna.github.io/cafeberlin/beer/ipa_lagunitas.webp",
+  "Heineken": "https://marieberezhna.github.io/cafeberlin/beer/heineken.webp",
+  "Brut Cava": "https://marieberezhna.github.io/cafeberlin/wine/cava_brut.webp",
+  "Ladrón de Lunas Blanco": "https://marieberezhna.github.io/cafeberlin/wine/ladron_de_lunas.webp",
+  "Ovejita Tinto": "https://marieberezhna.github.io/cafeberlin/wine/obejita_tinto.webp",
+  "Ginger Beer": "https://marieberezhna.github.io/cafeberlin/refrescos/ginger_beer_schweppes.webp",
+  "Ginger beer": "https://marieberezhna.github.io/cafeberlin/refrescos/ginger_beer_schweppes.webp",
+  "Ovejita verde Verdejo": "https://marieberezhna.github.io/cafeberlin/wine/obejita_blanco_verde.webp",
+
+};
+
+
+const ALL_INGRS = [...new Set(RAW.filter(x=>x.hasIngr&&x.ingr).flatMap(x=>x.ingr))];
+// Flat list of all {name, serving_es, serving_en, price} for wrong-answer pool
+const ALL_PRICES_FLAT = RAW.flatMap(x=>x.prices.map(s=>s.p));
+const UNIQUE_PRICES = [...new Set(ALL_PRICES_FLAT)];
+
+const CATS = ["Todo",...[...new Set(RAW.map(x=>x.cat))]];
+const FILTER_TYPES = ["ingredients","price","category","name"];
+const FILTER_LABELS    = {ingredients:"Ingredientes",price:"Precio",category:"Categoría",name:"Nombre"};
+const FILTER_LABELS_EN = {ingredients:"Ingredients",price:"Price",category:"Category",name:"Name"};
+const Q_META = {
+  ingredients:  {l:"¿Qué lleva?",    e:"What's in it?"},
+  ingredients2: {l:"¿Cuál más?",     e:"What else?"},
+  ingredients3: {l:"¿Cuál NO lleva?",e:"What's NOT in it?"},
+  price:        {l:"Precio exacto",   e:"Exact price"},
+  ratio:        {l:"Ratio",           e:"Ratio"},
+  category:     {l:"Categoría",       e:"Category"},
+  name:         {l:"Nombre",          e:"Name"},
+};
+
+let activeTab="Coctelería clásica", activeFilters=new Set(FILTER_TYPES);
+let lang = 'es';
+
+function setLang(l){
+  lang = l;
+  document.getElementById('btnES').classList.toggle('active', l==='es');
+  document.getElementById('btnEN').classList.toggle('active', l==='en');
+  document.getElementById('btnTest').textContent  = l==='es' ? '🎯 Test' : '🎯 Test';
+  document.getElementById('btnLearn').textContent = l==='es' ? '📖 Aprender' : '📖 Learn';
+  if(appMode==='test') startQuiz();
+  else startLearn();
+}
+
+function t(q, field){ return lang==='en' ? q[field+'_en'] : q[field+'_es']; }
+let questions=[], cur=0, score=0, answered=false;
+
+const sh   = a=>[...a].sort(()=>Math.random()-.5);
+const pick = (a,n)=>sh(a).slice(0,n);
+const fmt  = p=>`${p.toFixed(2).replace(".",",")} €`;
+
+function getPool(){ return activeTab==="Todo"?RAW:RAW.filter(x=>x.cat===activeTab); }
+
+function makeQs(){
+  const pool=getPool();
+  const cocktails=pool.filter(x=>x.hasIngr&&x.ingr&&x.ingr.length>1);
+  const allCats=[...new Set(RAW.map(x=>x.cat))];
+  const res=[];
+
+  // --- Ingredient questions (cocktails only) ---
+  if(activeFilters.has("ingredients")){
+    cocktails.forEach(item=>{
+      // Type 1: which IS an ingredient
+      const c1=item.ingr[Math.floor(Math.random()*item.ingr.length)];
+      const w1=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i))).slice(0,3);
+      if(w1.length>=3) res.push({qtype:"ingredients",img:IMAGES[item.name]||null,
+        q_es:`¿Cuál de estos ingredientes lleva el ${item.name}?`,
+        q_en:`Which of these is in the ${item.name}?`,
+        opts:sh([c1,...w1]),answer:c1,cat:item.cat,
+        hint_es:`${item.name}: ${item.ingr.join(", ")}`,
+        hint_en:`${item.name}: ${item.ingr.join(", ")}`});
+      // Type 2: complete the recipe
+      if(item.ingr.length>=3){
+        const s=sh(item.ingr); const shown=s.slice(0,2),c2=s[2];
+        const w2=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i))).slice(0,3);
+        if(w2.length>=3) res.push({qtype:"ingredients2",img:IMAGES[item.name]||null,
+          q_es:`El ${item.name} lleva ${shown.join(" y ")}… ¿cuál más?`,
+          q_en:`${item.name} has ${shown.join(" and ")}… which else?`,
+          opts:sh([c2,...w2]),answer:c2,cat:item.cat,
+          hint_es:`${item.name}: ${item.ingr.join(", ")}`,
+          hint_en:`${item.name}: ${item.ingr.join(", ")}`});
+      }
+      // Type 3: which is NOT an ingredient
+      if(item.ingr.length>=3){
+        const intruder=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i)))[0];
+        const decoys=sh(item.ingr).slice(0,3);
+        if(intruder&&decoys.length>=3) res.push({qtype:"ingredients3",img:IMAGES[item.name]||null,
+          q_es:`¿Cuál de estos NO lleva el ${item.name}?`,
+          q_en:`Which of these is NOT in the ${item.name}?`,
+          opts:sh([intruder,...decoys]),answer:intruder,cat:item.cat,
+          hint_es:`${item.name} lleva: ${item.ingr.join(", ")}`,
+          hint_en:`${item.name} contains: ${item.ingr.join(", ")}`});
+      }
+    });
+  }
+
+  // --- Price questions: one per serving format ---
+  if(activeFilters.has("price")){
+    pool.forEach(item=>{
+      item.prices.forEach(serving=>{
+        // Wrong options: other prices from the whole menu, excluding the correct value
+        const wrongPs=sh(UNIQUE_PRICES.filter(p=>p!==serving.p)).slice(0,3);
+        const allOpts=sh([serving.p,...wrongPs]).map(fmt);
+        const hint_parts=item.prices.map(s=>`${s.es}: ${fmt(s.p)}`).join(" · ");
+        const hint_parts_en=item.prices.map(s=>`${s.en}: ${fmt(s.p)}`).join(" · ");
+        res.push({qtype:"price",img:IMAGES[item.name]||null,
+          q_es:`¿Cuánto cuesta el ${item.name} (${serving.es})?`,
+          q_en:`How much is the ${item.name} (${serving.en})?`,
+          opts:allOpts, answer:fmt(serving.p), cat:item.cat,
+          hint_es:`${item.name} — ${hint_parts}`,
+          hint_en:`${item.name} — ${hint_parts_en}`});
+      });
+    });
+  }
+
+
+  // --- Category questions (only in "Todo" tab) ---
+  if(activeFilters.has("category")&&activeTab==="Todo"){
+    pool.forEach(item=>{
+      const wrongCats=sh(allCats.filter(c=>c!==item.cat)).slice(0,3);
+      res.push({qtype:"category",img:IMAGES[item.name]||null,
+        q_es:`¿En qué sección está el ${item.name}?`,
+        q_en:`Which section is ${item.name} in?`,
+        opts:sh([item.cat,...wrongCats]),answer:item.cat,cat:item.cat,
+        hint_es:`${item.name} está en "${item.cat}"`,
+        hint_en:`${item.name} is in "${item.cat}"`});
+    });
+  }
+
+  // --- Ratio questions (only for items with doses) ---
+  if(activeFilters.has("ingredients")){
+    const itemsWithDoses = pool.filter(x=>x.doses && Object.keys(x.doses).length>0);
+    const allItemsWithDoses = RAW.filter(x=>x.doses && Object.keys(x.doses).length>0);
+
+    // Helper: build a ratio string for an item
+    function ratioStr(item){
+      return item.ingr.map(ing=>{
+        const dose = item.doses && item.doses[ing];
+        return dose ? `${dose} ${ing}` : ing;
+      }).join(", ");
+    }
+
+    itemsWithDoses.forEach(item=>{
+      const correct = ratioStr(item);
+      // Wrong options: ratio strings from other items with doses, or if not enough, shuffle doses of this item
+      const otherRatios = sh(allItemsWithDoses.filter(x=>x.name!==item.name)).slice(0,3).map(ratioStr);
+      // Pad with shuffled-dose variants if needed
+      while(otherRatios.length < 3){
+        const shuffledDoses = sh(Object.entries(item.doses||{}));
+        const fake = item.ingr.map(ing=>{
+          const dose = shuffledDoses.find(([k])=>k!==ing)?.[1];
+          return dose ? `${dose} ${ing}` : ing;
+        }).join(", ");
+        if(fake !== correct) otherRatios.push(fake);
+        else break;
+      }
+      if(otherRatios.length >= 1){
+        res.push({qtype:"ratio", img:IMAGES[item.name]||null,
+          q_es:`¿Cuál es el ratio del ${item.name}?`,
+          q_en:`What is the ratio for the ${item.name}?`,
+          opts:sh([correct,...otherRatios.slice(0,3)]), answer:correct, cat:item.cat,
+          hint_es:`${item.name}: ${correct}`,
+          hint_en:`${item.name}: ${correct}`});
+      }
+    });
+  }
+
+  // --- Name questions (cocktails only — use ingredients as clue) ---
+  if(activeFilters.has("name")){
+    const cocktailItems = pool.filter(x=>x.hasIngr&&x.ingr);
+    cocktailItems.forEach(item=>{
+      // Try several random clue combos until we find one that uniquely
+      // identifies this item among the pool (no other item shares ALL clue ingredients)
+      let clue=null;
+      const maxTries=8;
+      for(let attempt=0; attempt<maxTries; attempt++){
+        const size = item.ingr.length>=3 ? (Math.random()<0.5?2:3) : Math.min(2,item.ingr.length);
+        const candidate = pick(item.ingr, size);
+        const ambiguous = cocktailItems.some(other=>
+          other.name!==item.name &&
+          candidate.every(c=>other.ingr.includes(c))
+        );
+        if(!ambiguous){ clue=candidate; break; }
+      }
+      if(!clue) return; // couldn't find a unique clue — skip this item
+
+      const wrongNames=sh(cocktailItems.filter(x=>x.name!==item.name)).slice(0,3).map(x=>x.name);
+      if(wrongNames.length>=3) res.push({qtype:"name",img:IMAGES[item.name]||null,
+        q_es:`¿Qué cóctel lleva ${clue.join(" y ")}?`,
+        q_en:`Which cocktail has ${clue.join(" and ")}?`,
+        opts:sh([item.name,...wrongNames]),answer:item.name,cat:item.cat,
+        hint_es:`${item.name}: ${item.ingr.join(", ")}`,
+        hint_en:`${item.name}: ${item.ingr.join(", ")}`});
+    });
+  }
+
+  return sh(res).slice(0,15);
+}
+
+function updateMeta(){
+  document.getElementById("qnum").textContent=questions.length?`${cur+1}/${questions.length}`:"–";
+  document.getElementById("qok").textContent=score;
+  document.getElementById("qpct").textContent=cur===0?"0%":Math.round(score/cur*100)+"%";
+  document.getElementById("prog").style.width=questions.length?`${cur/questions.length*100}%`:"0%";
+}
+function buildTabs(){
+  document.getElementById("tabs").innerHTML=CATS.map(c=>
+    `<button class="tab${c===activeTab?" active":""}" onclick="setTab('${c.replace(/'/g,"\\'")}')">${c}</button>`
+  ).join("");
+}
+function buildFilters(){
+  const btns=FILTER_TYPES.map(t=>
+    `<button class="filt${activeFilters.has(t)?" on":""}" onclick="toggleFilter('${t}')">${FILTER_LABELS[t]} / ${FILTER_LABELS_EN[t]}</button>`
+  ).join("");
+  document.getElementById("filters").innerHTML=`<span class="filter-label">🔍 Tipo:</span>${btns}`;
+}
+function setTab(c){activeTab=c;buildTabs();if(appMode==='learn')startLearn();else startQuiz();}
+function toggleFilter(t){
+  if(activeFilters.has(t)&&activeFilters.size===1)return;
+  activeFilters.has(t)?activeFilters.delete(t):activeFilters.add(t);
+  buildFilters();startQuiz();
+}
+function startQuiz(){
+  questions=makeQs();cur=0;score=0;answered=false;
+  if(!questions.length){
+    document.getElementById("area").innerHTML=`<div class="no-q">No hay suficientes preguntas para esta combinación.<br><em>Not enough questions for this combination.</em></div>`;
+    updateMeta();return;
+  }
+  render();
+}
+function render(){
+  if(cur>=questions.length){renderEnd();return;}
+  answered=false;updateMeta();
+  const q=questions[cur];
+  const m=Q_META[q.qtype];
+  const imgHtml = q.img ? ['<img class="qimg" src="', q.img, '" alt="">'].join('') : '';
+  document.getElementById("area").innerHTML=`
+    <div class="qcard">
+      <div class="qtype">${m.l} / ${m.e}<span class="qtag">${q.cat}</span></div>
+      ${imgHtml}
+      <div class="qtext">${q.q_es}</div>
+      <div class="qtrans">${q.q_en}</div>
+      <div class="${q.opts.some(o=>IMAGES[o])?'opts-img':'opts'}" id="optsdiv">
+        ${q.opts.map(o=>{
+          const img=IMAGES[o];
+          const esc=o.replace(/'/g,"\\'");
+          const ans=q.answer.replace(/'/g,"\\'");
+          if(img) return '<button class="ob-img" onclick="choose(this,\''+esc+'\',\''+ans+'\')"><img src="'+img+'" alt="'+o+'"><span>'+o+'</span></button>';
+          return '<button class="ob" onclick="choose(this,\''+esc+'\',\''+ans+'\')">'+o+'</button>';
+        }).join("")}
+      </div>
+      <div class="fb" id="fb"></div>
+    </div>
+    <div class="nav" style="display:none" id="nav">
+      <button class="pri" onclick="nextQ()">${cur<questions.length-1?"Siguiente / Next →":"Resultados / Results →"}</button>
+    </div>`;
+}
+function choose(btn,chosen,correct){
+  if(answered)return;answered=true;
+  const ok=chosen===correct;
+  if(ok)score++;
+  document.querySelectorAll(".ob,.ob-img").forEach(b=>{
+    b.disabled=true;
+    if(b.textContent.trim()===correct)b.classList.add("ok");
+    else if(b===btn&&!ok)b.classList.add("bad");
+  });
+  const q=questions[cur];
+  const fb=document.getElementById("fb");
+  fb.style.display="block";
+  fb.innerHTML=ok
+    ?`<strong>✓ Correcto!</strong><br><span>${q.hint_es}<br><em>${q.hint_en}</em></span>`
+    :`<strong>✗ Incorrecto</strong> — respuesta: <strong>${correct}</strong><br><span>${q.hint_es}<br><em>${q.hint_en}</em></span>`;
+  document.getElementById("nav").style.display="flex";
+  updateMeta();
+}
+function nextQ(){cur++;render();}
+function renderEnd(){
+  document.getElementById("prog").style.width="100%";
+  document.getElementById("qnum").textContent=`${questions.length}/${questions.length}`;
+  document.getElementById("qpct").textContent=Math.round(score/questions.length*100)+"%";
+  const pct=Math.round(score/questions.length*100);
+  const e=pct>=80?"🏆":pct>=50?"👍":"📚";
+  const m_es=pct>=80?"¡Eres un experto de la carta!":pct>=50?"Buen trabajo, sigue practicando.":"Hay que estudiar más la carta.";
+  const m_en=pct>=80?"You're a menu expert!":pct>=50?"Good job, keep practicing!":"More menu studying needed!";
+  document.getElementById("area").innerHTML=`
+    <div class="qcard end">
+      <div class="big">${e}</div>
+      <div class="sc">${score} / ${questions.length}</div>
+      <p>${m_es}<br><em>${m_en}</em></p>
+      <div class="nav" style="margin-top:1.5rem;display:flex">
+        <button class="pri" onclick="startQuiz()">Jugar de nuevo / Play again</button>
+      </div>
+    </div>`;
+}
+// ── MODE ──────────────────────────────────────────────────
+let appMode = 'learn'; // 'test' | 'learn'
+
+function setMode(m){
+  appMode = m;
+  document.getElementById('btnTest').classList.toggle('active', m==='test');
+  document.getElementById('btnLearn').classList.toggle('active', m==='learn');
+  document.getElementById('filters').style.display = m==='test' ? '' : 'none';
+  document.getElementById('metaBar').style.display = m==='test' ? '' : 'none';
+  buildTabs();
+  if(m==='test') startQuiz();
+  else startLearn();
+}
+
+// ── LEARN MODE ────────────────────────────────────────────
+const COCKTAILS_WITH_INGR = RAW.filter(x=>x.hasIngr && x.ingr && x.ingr.length>1);
+let learnQueue = [], learnIdx = 0;
+let learnStage = 'main';   // 'main' (study+quiz per item) | 'recall' (final review of all)
+let learnPhase = 'study';  // for 'main': 'study' | 'quiz'
+let recallSelected = new Set();
+let recallStats = {hits:0, total:0, perfect:0, items:0};
+
+function getLearnPool(){
+  const cats = activeTab==='Todo' ? null : activeTab;
+  return RAW.filter(x=> !cats || x.cat===cats);
+}
+
+function startLearn(){
+  learnQueue = sh(getLearnPool());
+  learnIdx = 0;
+  learnStage = 'overview';
+  learnPhase = 'study';
+  recallStats = {hits:0, total:0, perfect:0, items:0};
+  document.getElementById('prog').style.width = '0%';
+  renderLearn();
+}
+
+function renderOverview(){
+  const cat = activeTab==='Todo' ? 'Todo el menú' : activeTab;
+  const getMinPrice = item => item.prices && item.prices.length ? Math.min(...item.prices.map(p=>p.p)) : 9999;
+  const items = [...learnQueue].sort((a,b) => {
+    const pa = getMinPrice(a), pb = getMinPrice(b);
+    if(pa !== pb) return pa - pb;
+    return a.name.localeCompare(b.name, 'es');
+  });
+  const catImg = IMAGES[cat];
+
+  const cardsHtml = items.map((item,i)=>{
+    const img = IMAGES[item.name];
+    const price = priceLabel(item);
+    const catLabel = activeTab==='Todo' ? `<span style="font-size:11px;color:#9a9793;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">${item.cat}</span>` : '';
+    const GRP_COLOR = {spirit:"#F09595",liqueur:"#E0AE6B",filler:"#8FC1E0",bitter:"#C9A0DC",sweet:"#9ECB7A",other:"#9a9793"};
+    const ingrLine = item.hasIngr && item.ingr && item.ingr.length
+      ? `<div style="font-size:12px;margin-top:5px;line-height:1.8">${item.ingr.map(ing=>{
+          const dose = item.doses && item.doses[ing] ? `<span style="opacity:.7"> ${item.doses[ing]}</span>` : '';
+          const col = GRP_COLOR[ingrGroup(ing)] || GRP_COLOR.other;
+          return `<span style="color:${col}">${ing}${dose}</span>`;
+        }).join('<span style="color:#3a3835"> · </span>')}</div>` : '';
+    const methodLine = (item.method_es || item.method_en)
+      ? `<div style="font-size:12px;margin-top:6px;border-top:0.5px solid rgba(232,230,225,0.1);padding-top:6px">${lang==="en"?"Method":"Método"} <span style="color:#8FC1E0;font-weight:600">${lang==='en' ? (item.method_en||item.method_es) : (item.method_es||item.method_en)}</span></div>` : '';
+    const glassName = item[`glass_${lang}`] || item.glass_es || item.glass_en || null;
+    const glassImg = glassName ? IMAGES[`glass:${item.glass_es||item.glass_en}`] : null;
+    const glassHtml = glassName
+      ? `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;min-width:52px">
+          ${glassImg
+            ? `<img src="${glassImg}" alt="${glassName}" style="width:44px;height:60px;object-fit:contain">`
+            : `<div style="width:44px;height:60px;display:flex;align-items:center;justify-content:center;font-size:24px">🥛</div>`}
+          <span style="font-size:10px;color:#7a7875;text-align:center;line-height:1.2">${glassName}</span>
+        </div>` : '';
+    return `<div style="background:#1f1e1b;border:0.5px solid rgba(232,230,225,0.15);border-radius:12px;padding:14px;display:flex;align-items:flex-start;gap:14px">
+      ${img
+        ? `<img src="${img}" alt="${item.name}" style="width:64px;height:64px;object-fit:cover;border-radius:10px;flex-shrink:0">`
+        : `<div style="width:64px;height:64px;border-radius:10px;background:#2a2926;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px">🍹</div>`}
+      <div style="flex:1;min-width:0">
+        ${catLabel}
+        <div style="font-size:16px;font-weight:700;color:#e8e6e1;line-height:1.3">${item.name}</div>
+        ${price ? `<div style="font-size:14px;color:#E0AE6B;margin-top:4px;font-weight:500">${price}</div>` : ''}
+        ${ingrLine}
+        ${methodLine}
+      </div>
+      ${glassHtml}
+    </div>`;
+  }).join('');
+
+  document.getElementById('area').innerHTML = `
+    <div style="background:#1a1917;border:1px solid rgba(224,174,107,0.3);border-radius:16px;padding:20px;margin-bottom:16px;text-align:center">
+      ${catImg ? `<img src="${catImg}" alt="${cat}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;margin-bottom:12px">` : ''}
+      <div style="font-size:22px;font-weight:700;color:#e8e6e1;margin-bottom:4px">${cat}</div>
+      <div style="font-size:13px;color:#9a9793">${items.length} ${items.length===1?'ítem':'ítems'} en esta sección</div>
+    </div>
+    <div style="font-size:12px;color:#9a9793;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-left:2px">📋 Repasa antes de empezar</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">${cardsHtml}</div>
+    <button class="pri" style="width:100%;padding:14px;border:none;border-radius:10px;background:#e8e6e1;color:#0f0e0c;font-size:16px;font-weight:700;cursor:pointer" onclick="startLearnMain()">¡Empezar repaso! →</button>`;
+}
+
+function startLearnMain(){
+  learnStage = 'main';
+  learnIdx = 0;
+  learnPhase = 'study';
+  renderLearn();
+}
+
+function renderLearn(){
+  if(learnStage==='overview'){ renderOverview(); return; }
+  if(learnStage==='main'){
+    if(learnIdx >= learnQueue.length){
+      learnStage='recall';
+      learnIdx=0;
+      // Recall stage only makes sense for items with real recipes
+      if(!learnQueue.some(x=>x.hasIngr && x.ingr && x.ingr.length>1)){
+        renderLearnEnd(); return;
+      }
+      renderLearn();
+      return;
+    }
+    const item = learnQueue[learnIdx];
+    const pct = Math.round((learnIdx / learnQueue.length)*50);
+    document.getElementById('prog').style.width = pct+'%';
+    const hasRecipe = item.hasIngr && item.ingr && item.ingr.length>1;
+    if(learnPhase==='study') renderStudy(item);
+    else if(learnPhase==='recall' && hasRecipe) renderRecall(item);
+    else renderLearnQuiz(item);
+  } else {
+    // Final recall stage: skip items without real recipes
+    while(learnIdx < learnQueue.length && !(learnQueue[learnIdx].hasIngr && learnQueue[learnIdx].ingr && learnQueue[learnIdx].ingr.length>1)){
+      learnIdx++;
+    }
+    if(learnIdx >= learnQueue.length){ renderLearnEnd(); return; }
+    const item = learnQueue[learnIdx];
+    const pct = 50 + Math.round((learnIdx / learnQueue.length)*50);
+    document.getElementById('prog').style.width = pct+'%';
+    renderRecall(item);
+  }
+}
+
+function genIngrQ(item){
+  const types = sh(['ingredients','ingredients2','ingredients3']);
+  for(const t of types){
+    if(t==='ingredients'){
+      const correct=item.ingr[Math.floor(Math.random()*item.ingr.length)];
+      const wrongs=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i))).slice(0,3);
+      if(wrongs.length>=3) return {qtype:t,
+        q_es:`¿Cuál de estos ingredientes lleva el ${item.name}?`,
+        q_en:`Which of these is in the ${item.name}?`,
+        opts:sh([correct,...wrongs]),answer:correct,
+        hint_es:`${item.name}: ${item.ingr.join(", ")}`,
+        hint_en:`${item.name}: ${item.ingr.join(", ")}`};
+    }
+    if(t==='ingredients2' && item.ingr.length>=3){
+      const s=sh(item.ingr); const shown=s.slice(0,2),c2=s[2];
+      const wrongs=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i))).slice(0,3);
+      if(wrongs.length>=3) return {qtype:t,
+        q_es:`El ${item.name} lleva ${shown.join(" y ")}… ¿cuál más?`,
+        q_en:`${item.name} has ${shown.join(" and ")}… which else?`,
+        opts:sh([c2,...wrongs]),answer:c2,
+        hint_es:`${item.name}: ${item.ingr.join(", ")}`,
+        hint_en:`${item.name}: ${item.ingr.join(", ")}`};
+    }
+    if(t==='ingredients3' && item.ingr.length>=3){
+      const intruder=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i)))[0];
+      const decoys=sh(item.ingr).slice(0,3);
+      if(intruder&&decoys.length>=3) return {qtype:t,
+        q_es:`¿Cuál de estos NO lleva el ${item.name}?`,
+        q_en:`Which of these is NOT in the ${item.name}?`,
+        opts:sh([intruder,...decoys]),answer:intruder,
+        hint_es:`${item.name} lleva: ${item.ingr.join(", ")}`,
+        hint_en:`${item.name} contains: ${item.ingr.join(", ")}`};
+    }
+  }
+  return null;
+}
+
+function genPriceQ(item){
+  if(!item.prices || !item.prices.length) return null;
+  const serving = item.prices[Math.floor(Math.random()*item.prices.length)];
+  const wrongPs = sh(UNIQUE_PRICES.filter(p=>p!==serving.p)).slice(0,3);
+  if(wrongPs.length<3) return null;
+  const hint_parts = item.prices.map(s=>`${s.es}: ${fmt(s.p)}`).join(" · ");
+  const hint_parts_en = item.prices.map(s=>`${s.en}: ${fmt(s.p)}`).join(" · ");
+  return {qtype:'price',
+    q_es:`¿Cuánto cuesta el ${item.name} (${serving.es})?`,
+    q_en:`How much is the ${item.name} (${serving.en})?`,
+    opts:sh([serving.p,...wrongPs]).map(fmt),answer:fmt(serving.p),
+    hint_es:`${item.name} — ${hint_parts}`,
+    hint_en:`${item.name} — ${hint_parts_en}`};
+}
+
+function genQuizQueue(item){
+  // Always include a price question; include an ingredient question if the item has a recipe.
+  const qs = [];
+  const hasRecipe = item.hasIngr && item.ingr && item.ingr.length>1;
+  if(hasRecipe){
+    const iq = genIngrQ(item);
+    if(iq) qs.push(iq);
+  }
+  const pq = genPriceQ(item);
+  if(pq) qs.push(pq);
+  return qs;
+}
+
+let currentLearnQ = null;
+let quizQueue = [];
+let quizQueueIdx = 0;
+let quizQueueItem = null;
+
+function renderLearnQuiz(item){
+  // Build the queue once per item (when we first enter quiz phase for it)
+  if(quizQueueItem !== item){
+    quizQueue = genQuizQueue(item);
+    quizQueueIdx = 0;
+    quizQueueItem = item;
+  }
+  if(quizQueueIdx >= quizQueue.length){
+    quizQueueItem = null;
+    nextLearn();
+    return;
+  }
+  currentLearnQ = quizQueue[quizQueueIdx];
+  const q = currentLearnQ;
+  const optsClass = q.opts.some(o=>IMAGES[o]) ? 'opts-img' : 'opts';
+  const optsHtml = q.opts.map(o=>{
+    const img=IMAGES[o];
+    const esc=o.replace(/'/g,"\\'");
+    const ans=q.answer.replace(/'/g,"\\'");
+    if(img) return `<button class="ob-img" onclick="chooseLearn(this,'${esc}','${ans}')"><img src="${img}" alt="${o}"><span>${o}</span></button>`;
+    return `<button class="ob" onclick="chooseLearn(this,'${esc}','${ans}')">${o}</button>`;
+  }).join('');
+
+  const isLastInItem = quizQueueIdx >= quizQueue.length - 1;
+  const isLastItem = learnIdx >= learnQueue.length - 1;
+  const nextLabel = (isLastInItem && isLastItem) ? 'Ver resultados / Results →' : 'Siguiente / Next →';
+
+  document.getElementById('area').innerHTML = `
+    <div class="learn-card">
+      <div class="learn-counter">Práctica · ${learnIdx+1} / ${learnQueue.length}${quizQueue.length>1?` · ${quizQueueIdx+1}/${quizQueue.length}`:''}</div>
+      <div class="qtype">${Q_META[q.qtype].l} / ${Q_META[q.qtype].e}<span class="qtag">${item.name}</span></div>
+      <div class="qtext">${q.q_es}</div>
+      <div class="qtrans">${q.q_en}</div>
+      <div class="${optsClass}">${optsHtml}</div>
+      <div class="fb" id="fb"></div>
+    </div>
+    <div class="nav" style="display:none" id="nav">
+      <button class="pri" onclick="nextQuizStep()">${nextLabel}</button>
+    </div>`;
+}
+
+function nextQuizStep(){
+  quizQueueIdx++;
+  renderLearn();
+}
+
+function chooseLearn(btn, chosen, correct){
+  const q = currentLearnQ;
+  document.querySelectorAll('.ob,.ob-img').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent.trim()===correct) b.classList.add('ok');
+    else if(b===btn && chosen!==correct) b.classList.add('bad');
+  });
+  const ok = chosen===correct;
+  const fb=document.getElementById('fb');
+  fb.style.display='block';
+  fb.innerHTML = ok
+    ? `<strong>✓ Correcto!</strong><br><span>${q.hint_es}<br><em>${q.hint_en}</em></span>`
+    : `<strong>✗ Incorrecto</strong> — respuesta: <strong>${correct}</strong><br><span>${q.hint_es}<br><em>${q.hint_en}</em></span>`;
+  document.getElementById('nav').style.display='flex';
+}
+
+const INGR_GROUP = {
+  "Tequila":"spirit","Tequila Don Julio":"spirit","Gin":"spirit","Gin Tanqueray":"spirit",
+  "Gin Mare":"spirit","Vodka":"spirit","Moskovskaya":"spirit","Vodka Smirnoff Tamarindo":"spirit",
+  "Ron":"spirit","Ron blanco":"spirit","Ron jamaicano":"spirit","Bumbu":"spirit","Diplomático Planas":"spirit",
+  "Jack Daniels Fire":"spirit","Jack Daniels Triple Mash":"spirit","Monkey Shoulder":"spirit",
+  "Fino":"spirit","Cerveza":"spirit","Vino tinto":"spirit","Tanqueray 0.0":"spirit",
+  "Triple Sec Bols":"liqueur","Licor Bols Blue Curaçao":"liqueur","Licor yuzu":"liqueur",
+  "Licor Midori":"liqueur","Licor de café":"liqueur","Licor de café Bols":"liqueur",
+  "Licor de humo":"liqueur","Licor de vainilla Bols":"liqueur","Licor mandarina MB":"liqueur",
+  "Licor Bols Chocolate":"liqueur","Licor Bols Mantequilla":"liqueur","Licor Bols Yogurt":"liqueur",
+  "Chambord":"liqueur","Bénédictine DOM":"liqueur","Vermut":"liqueur","Vermut tinto":"liqueur",
+  "Aperol":"liqueur","Campari":"liqueur","Sarti Rosa":"liqueur","Bols Saúco":"liqueur","Terry":"liqueur",
+  "7UP":"filler","Cava":"filler","Soda":"filler","Soda de pomelo":"filler","Ginger Ale":"filler",
+  "Ginger beer":"filler","Schweppes limón":"filler","Zumo de tomate":"filler",
+  "Zumo de naranja":"filler","Zumo de piña":"filler","Zumo de arándanos":"filler",
+  "Zumo de limón":"filler","Zumo de lima":"filler",
+  "Bitter caffè":"bitter","Bitter de cacao":"bitter","Bitter de naranja":"bitter",
+  "Bitter habanero":"bitter","Salsa inglesa":"bitter","Tabasco":"bitter",
+  "Agave":"sweet","Sirope":"sweet","Sirope amarena":"sweet","Sirope de agave":"sweet",
+  "Azúcar líquido":"sweet","Sirope de vainilla":"sweet","Sirope falernum":"sweet",
+  "Sirope pandán":"sweet","Jalea de naranja":"sweet",
+};
+const GROUP_ORDER = ["spirit","liqueur","filler","bitter","sweet","other"];
+const GROUP_LABELS = {
+  spirit:"Alcohol / Spirit", liqueur:"Licores / Liqueurs", filler:"Mixers / Sodas",
+  bitter:"Bitters", sweet:"Endulzantes / Sweeteners", other:"Otros / Other"
+};
+function ingrGroup(name){ return INGR_GROUP[name] || "other"; }
+
+function priceLabel(item){
+  if(!item.prices || !item.prices.length) return '';
+  if(item.prices.length===1) return fmt(item.prices[0].p);
+  return item.prices.map(s=>`${fmt(s.p)} (${s.es})`).join(' · ');
+}
+
+function renderStudy(item){
+  const hasRecipe = item.hasIngr && item.ingr && item.ingr.length>1;
+
+  let rowsHtml = '';
+  if(hasRecipe){
+    // Group this cocktail's ingredients by category, preserving GROUP_ORDER
+    const byGroup = {};
+    item.ingr.forEach(ing=>{
+      const g = ingrGroup(ing);
+      (byGroup[g] = byGroup[g] || []).push(ing);
+    });
+
+    // Row 1: spirit + liqueur share one row. Row 2: filler/bitter/sweet/other share another row.
+    const ROW_GROUPS = [["spirit","liqueur"], ["filler","bitter","sweet","other"]];
+
+    rowsHtml = ROW_GROUPS.map(rowGroups=>{
+      const present = rowGroups.filter(g=>byGroup[g]);
+      if(!present.length) return '';
+      const colsHtml = present.map(g=>{
+        const itemsHtml = byGroup[g].map(ing=>{
+          const img = IMAGES[ing];
+          if(img) return `<div class="learn-ingr-item"><img src="${img}" alt="${ing}"><span>${ing}</span></div>`;
+          return `<div class="learn-ingr-item no-img"><span>${ing}</span></div>`;
+        }).join('');
+        return `<div class="ingr-group grp-${g}">
+          <div class="ingr-group-label">${GROUP_LABELS[g]}</div>
+          <div class="ingr-group-grid">${itemsHtml}</div>
+        </div>`;
+      }).join('');
+      return `<div class="ingr-row">${colsHtml}</div>`;
+    }).join('');
+  } else {
+    rowsHtml = `<div class="learn-hint">Sin receta — solo precio / No recipe — price only</div>`;
+  }
+
+  const btnAction = hasRecipe ? 'goRecall()' : 'goQuiz()';
+  const btnLabel = hasRecipe
+    ? 'Memorizado — a recordar →<br><small style="opacity:.6">o pulsa Espacio</small>'
+    : 'Memorizado — a practicar →<br><small style="opacity:.6">o pulsa Espacio</small>';
+
+  // Doses block
+  const dosesHtml = item.doses && Object.keys(item.doses).length
+    ? `<div style="margin-top:10px;padding:10px 12px;background:#1a1917;border-radius:8px;border:0.5px solid rgba(232,230,225,0.12)">
+        <div style="font-size:11px;color:#9a9793;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">📏 Medidas</div>
+        ${Object.entries(item.doses).map(([ing,dose])=>
+          `<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0">
+            <span style="color:#c8c5bf">${ing}</span>
+            <span style="color:#E0AE6B;font-weight:600">${dose}</span>
+          </div>`
+        ).join('')}
+      </div>` : '';
+
+  const methodHtml = (item.method_es || item.method_en)
+    ? `<div style="margin-top:10px;padding:8px 12px;background:#1a1917;border-radius:8px;border:0.5px solid rgba(232,230,225,0.12);display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:#9a9793;text-transform:uppercase;letter-spacing:.06em">${lang==="en"?"Method":"Método"}</span>
+        <span style="font-size:14px;color:#8FC1E0;font-weight:600">${lang==='en' ? (item.method_en||item.method_es) : (item.method_es||item.method_en)}</span>
+      </div>` : '';
+
+  document.getElementById('area').innerHTML = `
+    <div class="learn-card">
+      <div class="learn-counter">Estudio · ${learnIdx+1} / ${learnQueue.length}</div>
+      ${IMAGES[item.name]?`<img class="qimg" src="${IMAGES[item.name]}" alt="${item.name}">`:''}
+      <div class="learn-name">${item.name} <span class="learn-price">${priceLabel(item)}</span></div>
+      ${rowsHtml}
+      ${dosesHtml}
+      ${methodHtml}
+    </div>
+    <div class="nav">
+      <button class="pri" onclick="${btnAction}">${btnLabel}</button>
+    </div>`;
+}
+
+function goRecall(){
+  learnPhase = 'recall';
+  renderLearn();
+}
+
+function renderRecall(item){
+  // Pool: correct ingrs + random wrong ones from all cocktails
+  const wrongPool = sh(ALL_INGRS.filter(i=>!item.ingr.includes(i)));
+  const distractors = wrongPool.slice(0, Math.min(item.ingr.length + 2, 8));
+  // Shuffle within each group, but keep groups in GROUP_ORDER
+  const byGroup = {};
+  [...item.ingr, ...distractors].forEach(o=>{
+    const g = ingrGroup(o);
+    (byGroup[g] = byGroup[g] || []).push(o);
+  });
+  const allOpts = GROUP_ORDER.flatMap(g => byGroup[g] ? sh(byGroup[g]) : []);
+  recallSelected = new Set();
+
+  const optsHtml = allOpts.map(o=>{
+    const img = IMAGES[o];
+    const grp = ingrGroup(o);
+    const cls = `recall-opt grp-${grp}`;
+    if(img) return `<button class="${cls}" data-opt="${o.replace(/"/g,'&quot;')}" onclick="toggleRecall(this,'${o.replace(/'/g,"\\'")}')"><img src="${img}" alt="${o}"><span>${o}</span></button>`;
+    return `<button class="${cls}" data-opt="${o.replace(/"/g,'&quot;')}" onclick="toggleRecall(this,'${o.replace(/'/g,"\\'")}')"><span>${o}</span></button>`;
+  }).join('');
+
+  document.getElementById('area').innerHTML = `
+    <div class="learn-card">
+      <div class="learn-counter">${learnStage==='main'?'Recordar':'Repaso final'} · ${learnIdx+1} / ${learnQueue.length}</div>
+      ${IMAGES[item.name]?`<img class="qimg" src="${IMAGES[item.name]}" alt="${item.name}">`:''}
+      <div class="learn-name">${item.name} <span class="learn-price">${priceLabel(item)}</span></div>
+      <div class="learn-hint">Selecciona todos los ingredientes / Select all ingredients</div>
+      <div class="learn-ingr-grid" id="recallGrid">${optsHtml}</div>
+    </div>
+    <div class="nav" id="nav">
+      <button class="pri" onclick="checkRecall('${item.name.replace(/'/g,"\\'")}')">Comprobar / Check ✓</button>
+    </div>`;
+}
+
+function toggleRecall(btn, val){
+  if(btn.dataset.locked) return;
+  if(recallSelected.has(val)){
+    recallSelected.delete(val);
+    btn.classList.remove('selected');
+  } else {
+    recallSelected.add(val);
+    btn.classList.add('selected');
+  }
+}
+
+function checkRecall(name){
+  const item = learnQueue.find(x=>x.name===name);
+  const correct = new Set(item.ingr);
+  const grid = document.getElementById('recallGrid');
+  let hits=0, misses=0, wrongs=0;
+
+  grid.querySelectorAll('.recall-opt').forEach(btn=>{
+    btn.dataset.locked = '1';
+    const val = btn.dataset.opt;
+    const isCorrect = correct.has(val);
+    const isSelected = recallSelected.has(val);
+    if(isCorrect && isSelected){ btn.classList.add('correct'); hits++; }
+    else if(isCorrect && !isSelected){ btn.classList.add('missed'); misses++; }
+    else if(!isCorrect && isSelected){ btn.classList.add('wrong'); wrongs++; }
+    btn.classList.remove('selected');
+  });
+
+  const perfect = misses===0 && wrongs===0;
+  const msg = perfect
+    ? '✓ ¡Perfecto! / Perfect!'
+    : `${hits}/${item.ingr.length} ingredientes — ${misses} olvidados, ${wrongs} incorrectos`;
+
+  let nextLabel, nextAction;
+  if(learnStage==='main'){
+    // Practice recall, before the quiz question — doesn't count toward final stats
+    nextLabel = 'Practicar / Practice →';
+    nextAction = 'goQuiz()';
+  } else {
+    // Final review recall — counts toward end-of-session stats
+    recallStats.total += item.ingr.length;
+    recallStats.hits += hits;
+    recallStats.items++;
+    if(perfect) recallStats.perfect++;
+    const isLast = learnIdx >= learnQueue.length - 1;
+    nextLabel = isLast ? 'Ver resultados / Results →' : 'Siguiente / Next →';
+    nextAction = 'nextLearn()';
+  }
+
+  // Replace check button with feedback + next
+  document.querySelector('.nav').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+      <div style="text-align:center;padding:8px 0;font-size:14px;color:${perfect?'#97C459':'#c87020'}">${msg}</div>
+      <button class="pri" style="width:100%" onclick="${nextAction}">${nextLabel}</button>
+    </div>`;
+  document.getElementById('nav').dataset.checked = '1';
+}
+
+function goQuiz(){
+  learnPhase = 'quiz';
+  renderLearn();
+}
+
+function nextLearn(){
+  learnIdx++;
+  if(learnStage==='main') learnPhase = 'study';
+  renderLearn();
+}
+
+function renderLearnEnd(){
+  document.getElementById('prog').style.width='100%';
+  const hadRecipes = learnQueue.some(x=>x.hasIngr && x.ingr && x.ingr.length>1);
+
+  const reviewedLine = hadRecipes
+    ? `Repasaste ${learnQueue.length} cócteles.<br><em>You reviewed ${learnQueue.length} cocktails.</em>`
+    : `Repasaste ${learnQueue.length} bebidas.<br><em>You reviewed ${learnQueue.length} drinks.</em>`;
+
+  let recallBlock = '';
+  if(hadRecipes && recallStats.total>0){
+    const pct = Math.round(recallStats.hits/recallStats.total*100);
+    recallBlock = `<br><br>
+        <strong style="color:#e8e6e1">Repaso final / Final recall</strong><br>
+        ${recallStats.hits}/${recallStats.total} ingredientes (${pct}%) · ${recallStats.perfect}/${recallStats.items} perfectos`;
+  }
+
+  document.getElementById('area').innerHTML=`
+    <div class="learn-card end">
+      <div class="big">🎓</div>
+      <div class="sc" style="font-size:22px;font-weight:500;margin-bottom:8px">¡Sesión completada!</div>
+      <p style="color:#9a9793;font-size:14px">
+        ${reviewedLine}${recallBlock}
+      </p>
+      <div class="nav" style="margin-top:1.5rem;display:flex">
+        <button class="pri" onclick="startLearn()">Repetir / Again</button>
+      </div>
+    </div>`;
+}
+
+// Override keydown to also work in learn mode
+document.addEventListener('keydown', function(e) {
+  if (e.code === 'Space' || e.key === ' ' || e.code === 'Enter' || e.key === 'Enter') {
+    e.preventDefault();
+    if(appMode==='test'){
+      const nav = document.getElementById('nav');
+      if (nav && nav.style.display !== 'none') nextQ();
+    } else if(learnStage==='main'){
+      const item = learnQueue[learnIdx];
+      const hasRecipe = item && item.hasIngr && item.ingr && item.ingr.length>1;
+      if(learnPhase==='study'){
+        if(hasRecipe) goRecall(); else goQuiz();
+      } else if(learnPhase==='recall' && hasRecipe){
+        const nav = document.getElementById('nav');
+        if(nav && nav.dataset.checked==='1') goQuiz();
+      } else {
+        const nav = document.getElementById('nav');
+        if (nav && nav.style.display !== 'none') nextQuizStep();
+      }
+    } else {
+      // final review stage: space/enter advances only after "Check" has been pressed
+      const nav = document.getElementById('nav');
+      if(nav && nav.dataset.checked==='1') nextLearn();
+    }
+  }
+});
+
+buildTabs();buildFilters();setMode('learn');
+</script>
+</body>
+</html>
