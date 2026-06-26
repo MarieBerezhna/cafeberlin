@@ -28,7 +28,6 @@ h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#e8e6e1}
 .qtype{font-size:11px;font-weight:500;color:#7a7875;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .qtag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:20px;background:#2a2926;color:#7a7875;margin-left:6px;font-weight:400;text-transform:none;letter-spacing:0}
 .qtext{font-size:16px;font-weight:500;line-height:1.5;margin-bottom:3px;color:#e8e6e1}
-.qtrans{font-size:13px;color:#7a7875;font-style:italic;margin-bottom:1rem}
 .opts{display:grid;gap:7px}
 .ob{text-align:center;background:#232220;border:0.5px solid rgba(232,230,225,0.1);border-radius:8px;padding:9px 13px;font-size:14px;cursor:pointer;color:#e8e6e1}
 .ob:hover:not(:disabled){background:#2a2926;border-color:rgba(232,230,225,0.3)}
@@ -99,15 +98,9 @@ h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#e8e6e1}
 <div class="wrap">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
     <h1>🍸 Café Berlín</h1>
-    <div style="display:flex;gap:6px;align-items:center">
-      <div class="mode-switch" id="langSwitch">
-        <button class="mode-btn active" id="btnES" onclick="setLang('es')">🇪🇸 ES</button>
-        <button class="mode-btn" id="btnEN" onclick="setLang('en')">🇬🇧 EN</button>
-      </div>
-      <div class="mode-switch" id="modeSwitch">
-        <button class="mode-btn" id="btnTest" onclick="setMode('test')">🎯 Test</button>
-        <button class="mode-btn active" id="btnLearn" onclick="setMode('learn')">📖 Aprender</button>
-      </div>
+    <div class="mode-switch" id="modeSwitch">
+      <button class="mode-btn" id="btnTest" onclick="setMode('test')">🎯 Test</button>
+      <button class="mode-btn active" id="btnLearn" onclick="setMode('learn')">📖 Aprender</button>
     </div>
   </div>
   <div class="tabs-scroll"><div class="tabs" id="tabs"></div></div>
@@ -126,266 +119,267 @@ const RAW = [
   {cat:"Coctelería clásica",name:"Mojito",hasIngr:true,
    ingr:["Hierbabuena","Ron blanco","Zumo de lima","Azúcar líquido","Soda"],
    doses:{"Ron blanco":"1 oz","Zumo de lima":"1 oz","Azúcar líquido":"1 oz"},
-   method_es:"Removido", method_en:"Stir",
-   glass_es:"Collins (tubo)", glass_en:"Collins (tube)",
-   prices:[{es:"cóctel",en:"cocktail",p:11}]},
+   method:"Removido",
+   glass:"Collins (tubo)",
+   prices:[{label:"cóctel",p:11}]},
   {cat:"Cócteles – Acid Times",name:"Blue Margarita",hasIngr:true,ingr:["Tequila","Licor Bols Blue Curaçao","Sirope de agave","Zumo de lima"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Acid Times",name:"Brote Primera",hasIngr:true,ingr:["Gin Tanqueray","Licor yuzu","Azúcar líquido","Lima","Albahaca"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Acid Times",name:"Berlin Lemonade",hasIngr:true,ingr:["Jack Daniels Triple Mash","Triple Sec Bols","7UP","Jalea de naranja","Lima"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Acid Times",name:"Corazón de Luna",hasIngr:true,ingr:["Tequila","Triple Sec Bols","Lima","Lichee"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Acid Times",name:"Berlín Green",hasIngr:true,ingr:["Vodka","Licor Midori","Albahaca","Manzana verde","Fruta de la pasión"],
-   prices:[{es:"cóctel",en:"cocktail",p:13}]},
+   prices:[{label:"cóctel",p:13}]},
   {cat:"Cócteles – Sweet Times",name:"Porn Star Martini",hasIngr:true,ingr:["Moskovskaya","Licor de vainilla Bols","Puré de fruta de la pasión","Zumo de lima","Foam"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Sweet Times",name:"Éxodo",hasIngr:true,ingr:["Bumbu","Bitter caffè","Sirope pandán","Coco","Café"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Sweet Times",name:"Rubedo",hasIngr:true,ingr:["Gin","Vermut","Agave","Lima","Arándanos","Fresa"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Sweet Times",name:"Génesis",hasIngr:true,ingr:["Ron","Ginger Ale","Azúcar líquido","Lima","Calabaza asada","Naranja"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Sweet Times",name:"Ámbar con cacao",hasIngr:true,ingr:["Ron","Licor Bols Chocolate","Licor Bols Mantequilla","Sirope de vainilla"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Sweet Times",name:"Diego",hasIngr:true,ingr:["Jack Daniels Fire","Licor Bols Yogurt","Licor Bols Mantequilla","Sirope amarena","Zumo de arándanos"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Spicy Times",name:"Bloody Mary",hasIngr:true,ingr:["Moskovskaya","Zumo de tomate","Mix casero"],
-   prices:[{es:"cóctel",en:"cocktail",p:11}]},
+   prices:[{label:"cóctel",p:11}]},
   {cat:"Cócteles – Spicy Times",name:"Moscow Mule",hasIngr:true,ingr:["Moskovskaya","Ginger beer","Zumo de lima"],
-   prices:[{es:"cóctel",en:"cocktail",p:11}]},
+   prices:[{label:"cóctel",p:11}]},
   {cat:"Cócteles – Spicy Times",name:"Paloma Don Julio",hasIngr:true,ingr:["Tequila Don Julio","Soda de pomelo","Agave","Lima"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Spicy Times",name:"Matarreyes",hasIngr:true,ingr:["Vodka Smirnoff Tamarindo","Licor de humo","Triple Sec Bols","Agave","Lima","Maracuyá"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Hard Times",name:"Hombro al sol",hasIngr:true,ingr:["Monkey Shoulder","Fino","Bitter de naranja"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Hard Times",name:"Polvo de calima",hasIngr:true,ingr:["Diplomático Planas","Ron jamaicano","Chambord","Zumo de naranja","Zumo de piña","Sirope falernum","Zumo de lima"],
-   prices:[{es:"cóctel",en:"cocktail",p:12}]},
+   prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles – Hard Times",name:"Berlin Sling",hasIngr:true,ingr:["Gin Mare","Chambord","Bénédictine DOM","Triple Sec Bols","Piña","Lima"],
-   prices:[{es:"cóctel",en:"cocktail",p:12},{es:"cóctel con chupito de vodka",en:"cocktail with vodka shot",p:13}]},
+   prices:[{label:"cóctel",p:12},{label:"cóctel con chupito de vodka",p:13}]},
   {cat:"Café Cócteles",name:"Espresso Martini",hasIngr:true,ingr:["Moskovskaya","Licor de café Bols","Bitter de cacao","Sirope de vainilla","Café"],
-   prices:[{es:"cóctel",en:"cocktail",p:11}]},
+   prices:[{label:"cóctel",p:11}]},
   {cat:"Café Cócteles",name:"White Russian",hasIngr:true,ingr:["Vodka","Licor de café","Leche","Nata"],
-   prices:[{es:"cóctel",en:"cocktail",p:11}]},
+   prices:[{label:"cóctel",p:11}]},
   {cat:"Sin Alcohol",name:"Virgin Mai Tai",hasIngr:true,ingr:["Sirope","Frutas tropicales"],
-   prices:[{es:"sin alcohol",en:"non-alcoholic",p:8},{es:"con alcohol",en:"with alcohol",p:12}]},
+   prices:[{label:"sin alcohol",p:8},{label:"con alcohol",p:12}]},
   {cat:"Sin Alcohol",name:"Gin Fizz 0.0",hasIngr:true,ingr:["Tanqueray 0.0","Soda","Lima"],
-   prices:[{es:"cóctel",en:"cocktail",p:9}]},
+   prices:[{label:"cóctel",p:9}]},
   {cat:"Sin Alcohol",name:"Virgin Lady",hasIngr:true,ingr:["Tanqueray 0.0","Frutos rojos","Lima"],
-   prices:[{es:"cóctel",en:"cocktail",p:9}]},
+   prices:[{label:"cóctel",p:9}]},
   {cat:"Spritz",name:"Hugo Spritz",hasIngr:true,ingr:["Bols Saúco","Cava","Soda","Hierbabuena"],
-   prices:[{es:"copa",en:"glass",p:10}]},
+   prices:[{label:"copa",p:10}]},
   {cat:"Spritz",name:"Aperol Spritz",hasIngr:true,ingr:["Aperol","Cava","Soda"],
-   prices:[{es:"copa",en:"glass",p:8}]},
+   prices:[{label:"copa",p:8}]},
   {cat:"Spritz",name:"Yuzu Spritz",hasIngr:true,ingr:["Licor yuzu","Cava","Soda"],
-   prices:[{es:"copa",en:"glass",p:8}]},
+   prices:[{label:"copa",p:8}]},
   {cat:"Spritz",name:"Chambord Spritz",hasIngr:true,ingr:["Chambord","Cava","Soda"],
-   prices:[{es:"copa",en:"glass",p:8}]},
+   prices:[{label:"copa",p:8}]},
   {cat:"Spritz",name:"Campari Spritz",hasIngr:true,ingr:["Campari","Cava","Soda"],
-   prices:[{es:"copa",en:"glass",p:8}]},
+   prices:[{label:"copa",p:8}]},
   {cat:"Spritz",name:"Sarti Rosa Spritz",hasIngr:true,ingr:["Sarti Rosa","Cava","Soda"],
-   prices:[{es:"copa",en:"glass",p:8}]},
+   prices:[{label:"copa",p:8}]},
   {cat:"Jarras",name:"Agua de Valencia",hasIngr:true,ingr:["Gin Tanqueray","Triple Sec Bols","Licor mandarina MB","Cava","Zumo de naranja","Azúcar líquido"],
-   prices:[{es:"copa",en:"glass",p:7}]},
+   prices:[{label:"copa",p:7}]},
   {cat:"Jarras",name:"Sangría",hasIngr:true,ingr:["Diplomático Planas","Vino tinto","Triple Sec Bols","Terry","Vermut tinto","Zumo de naranja","Azúcar líquido"],
-   prices:[{es:"copa",en:"glass",p:7}]},
+   prices:[{label:"copa",p:7}]},
   {cat:"Jarras",name:"Tinto de verano",hasIngr:true,ingr:["Vino tinto","Schweppes limón","Zumo de limón"],
-   prices:[{es:"copa",en:"glass",p:5}]},
+   prices:[{label:"copa",p:5}]},
   {cat:"Ron",name:"Barceló Añejo",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:9.5},{es:"chupito",en:"shot",p:3}]},
+   prices:[{label:"combinado",p:9.5},{label:"chupito",p:3}]},
   {cat:"Ron",name:"Barceló Imperial",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:12},{es:"chupito",en:"shot",p:6}]},
+   prices:[{label:"combinado",p:12},{label:"chupito",p:6}]},
   {cat:"Ron",name:"Diplomático Planas",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"chupito",en:"shot",p:6}]},
+   prices:[{label:"combinado",p:10},{label:"chupito",p:6}]},
   {cat:"Ron",name:"Zacapa Centenario 23",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:16},{es:"chupito",en:"shot",p:8}]},
+   prices:[{label:"combinado",p:16},{label:"chupito",p:8}]},
   {cat:"Whisky",name:"Johnnie Walker Red Label",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:9},{es:"doble",en:"double",p:12},{es:"chupito",en:"shot",p:3}]},
+   prices:[{label:"combinado",p:9},{label:"doble",p:12},{label:"chupito",p:3}]},
   {cat:"Whisky",name:"Johnnie Walker Black Label 12Y",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:12},{es:"doble",en:"double",p:16},{es:"chupito",en:"shot",p:6}]},
+   prices:[{label:"combinado",p:12},{label:"doble",p:16},{label:"chupito",p:6}]},
   {cat:"Whisky",name:"Tullamore Dew",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:9},{es:"doble",en:"double",p:12},{es:"chupito",en:"shot",p:4}]},
+   prices:[{label:"combinado",p:9},{label:"doble",p:12},{label:"chupito",p:4}]},
   {cat:"Whisky",name:"Jack Daniels Old Nº7",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:9},{es:"doble",en:"double",p:14},{es:"chupito",en:"shot",p:5}]},
+   prices:[{label:"combinado",p:9},{label:"doble",p:14},{label:"chupito",p:5}]},
   {cat:"Whisky",name:"Bulleit Frontier Bourbon",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:12},{es:"doble",en:"double",p:16},{es:"chupito",en:"shot",p:6}]},
+   prices:[{label:"combinado",p:12},{label:"doble",p:16},{label:"chupito",p:6}]},
   {cat:"Whisky",name:"Monkey Shoulder",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:12},{es:"doble",en:"double",p:16},{es:"chupito",en:"shot",p:6}]},
+   prices:[{label:"combinado",p:12},{label:"doble",p:16},{label:"chupito",p:6}]},
   {cat:"Whisky",name:"Toki",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"doble",en:"double",p:18},{es:"chupito",en:"shot",p:5}]},
+   prices:[{label:"combinado",p:10},{label:"doble",p:18},{label:"chupito",p:5}]},
   {cat:"Whisky",name:"Bushmills",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"doble",en:"double",p:18},{es:"chupito",en:"shot",p:5}]},
+   prices:[{label:"combinado",p:10},{label:"doble",p:18},{label:"chupito",p:5}]},
   {cat:"Whisky",name:"Tomatin",hasIngr:false,
-   prices:[{es:"solo",en:"neat",p:12},{es:"doble",en:"double",p:20},{es:"chupito",en:"shot",p:6}]},
+   prices:[{label:"solo",p:12},{label:"doble",p:20},{label:"chupito",p:6}]},
   {cat:"Whisky",name:"Macallan",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:16}]},
+   prices:[{label:"copa",p:16}]},
   {cat:"Gin",name:"Tanqueray London Dry",hasIngr:false,
-   prices:[{es:"solo",en:"neat",p:9.5}]},
+   prices:[{label:"solo",p:9.5}]},
   {cat:"Gin",name:"Tanqueray Nº Ten",hasIngr:false,
-   prices:[{es:"solo",en:"neat",p:14}]},
+   prices:[{label:"solo",p:14}]},
   {cat:"Gin",name:"Tanqueray 0.0",hasIngr:false,
-   prices:[{es:"solo",en:"neat",p:10}]},
+   prices:[{label:"solo",p:10}]},
   {cat:"Gin",name:"Gin Mare",hasIngr:false,
-   prices:[{es:"solo",en:"neat",p:12}]},
+   prices:[{label:"solo",p:12}]},
   {cat:"Gin",name:"Fords",hasIngr:false,
-   prices:[{es:"solo",en:"neat",p:12}]},
+   prices:[{label:"solo",p:12}]},
   {cat:"Gin",name:"Larios 12",hasIngr:false,
-   prices:[{es:"solo",en:"neat",p:12}]},
+   prices:[{label:"solo",p:12}]},
   {cat:"Gin",name:"Larios Rose",hasIngr:false,
-   prices:[{es:"solo",en:"neat",p:10}]},
+   prices:[{label:"solo",p:10}]},
   {cat:"Gin",name:"Roku",hasIngr:false,
-   prices:[{es:"solo",en:"neat",p:12}]},
+   prices:[{label:"solo",p:12}]},
   {cat:"Gin",name:"Hendrick's",hasIngr:false,
-   prices:[{es:"solo",en:"neat",p:13}]},
+   prices:[{label:"solo",p:13}]},
   {cat:"Gin",name:"Macaronesia",hasIngr:false,
-   prices:[{es:"solo",en:"neat",p:9.5}]},
+   prices:[{label:"solo",p:9.5}]},
   {cat:"Tequila",name:"Rooster Rojo White",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"chupito",en:"shot",p:4}]},
+   prices:[{label:"combinado",p:10},{label:"chupito",p:4}]},
   {cat:"Tequila",name:"Mezcal Union",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:12},{es:"chupito",en:"shot",p:5}]},
+   prices:[{label:"combinado",p:12},{label:"chupito",p:5}]},
   {cat:"Tequila",name:"Don Julio Silver",hasIngr:false,img:'data:image/jpeg;base64,$B64',
-   prices:[{es:"combinado",en:"mixed drink",p:18},{es:"chupito",en:"shot",p:10}]},
+   prices:[{label:"combinado",p:18},{label:"chupito",p:10}]},
   {cat:"Tequila",name:"Don Julio Reposado",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:18},{es:"chupito",en:"shot",p:10}]},
+   prices:[{label:"combinado",p:18},{label:"chupito",p:10}]},
   {cat:"Vodka",name:"Moskovskaya",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:9.5},{es:"chupito",en:"shot",p:3}]},
+   prices:[{label:"combinado",p:9.5},{label:"chupito",p:3}]},
   {cat:"Vodka",name:"Cîroc",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:14},{es:"chupito",en:"shot",p:7}]},
+   prices:[{label:"combinado",p:14},{label:"chupito",p:7}]},
   {cat:"Vodka",name:"Beluga",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:16},{es:"chupito",en:"shot",p:9}]},
+   prices:[{label:"combinado",p:16},{label:"chupito",p:9}]},
   {cat:"Licores",name:"Jack Fire",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:9},{es:"chupito",en:"shot",p:5}]},
+   prices:[{label:"copa",p:9},{label:"chupito",p:5}]},
   {cat:"Licores",name:"Jägermeister",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"copa",en:"glass",p:8},{es:"chupito",en:"shot",p:3}]},
+   prices:[{label:"combinado",p:10},{label:"copa",p:8},{label:"chupito",p:3}]},
   {cat:"Licores",name:"Licor de arroz",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:6},{es:"chupito",en:"shot",p:3}]},
+   prices:[{label:"copa",p:6},{label:"chupito",p:3}]},
   {cat:"Licores",name:"Limoncello",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:6},{es:"chupito",en:"shot",p:3}]},
+   prices:[{label:"copa",p:6},{label:"chupito",p:3}]},
   {cat:"Licores",name:"Cazalla",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:6},{es:"chupito",en:"shot",p:3}]},
+   prices:[{label:"copa",p:6},{label:"chupito",p:3}]},
   {cat:"Licores",name:"Amaretto",hasIngr:false,
-   prices:[{es:"combinado",en:"mixed drink",p:10},{es:"copa",en:"glass",p:8},{es:"chupito",en:"shot",p:3}]},
+   prices:[{label:"combinado",p:10},{label:"copa",p:8},{label:"chupito",p:3}]},
   {cat:"Licores",name:"Baileys",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:6},{es:"chupito",en:"shot",p:3}]},
+   prices:[{label:"copa",p:6},{label:"chupito",p:3}]},
   {cat:"Vermut",name:"Vittore Rojo",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:4}]},
+   prices:[{label:"copa",p:4}]},
   {cat:"Vermut",name:"Vittore Blanco",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:4}]},
+   prices:[{label:"copa",p:4}]},
   {cat:"Vermut",name:"Martini Reserva Ambrato",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:5}]},
+   prices:[{label:"copa",p:5}]},
   {cat:"Vermut",name:"Martini Reserva Rubino",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:5}]},
+   prices:[{label:"copa",p:5}]},
   {cat:"Vermut",name:"Noilly Prat Blanco Seco",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:5}]},
+   prices:[{label:"copa",p:5}]},
   {cat:"Vino",name:"Ovejita verde Verdejo",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:4},{es:"botella",en:"bottle",p:20}]},
+   prices:[{label:"copa",p:4},{label:"botella",p:20}]},
   {cat:"Vino",name:"Ladrón de Lunas Blanco",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:4},{es:"botella",en:"bottle",p:20}]},
+   prices:[{label:"copa",p:4},{label:"botella",p:20}]},
   {cat:"Vino",name:"Ovejita Tinto",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:4},{es:"botella",en:"bottle",p:20}]},
+   prices:[{label:"copa",p:4},{label:"botella",p:20}]},
   {cat:"Vino",name:"Brut Cava",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:5},{es:"botella",en:"bottle",p:25}]},
+   prices:[{label:"copa",p:5},{label:"botella",p:25}]},
   {cat:"Vino",name:"Bollinger Spécial Cuvée",hasIngr:false,
-   prices:[{es:"botella",en:"bottle",p:100}]},
+   prices:[{label:"botella",p:100}]},
   {cat:"Vino",name:"Ramón Bilbao Rioja",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:5},{es:"botella",en:"bottle",p:25}]},
+   prices:[{label:"copa",p:5},{label:"botella",p:25}]},
   {cat:"Vino",name:"Vento n°1",hasIngr:false,
-   prices:[{es:"copa",en:"glass",p:4.5},{es:"botella",en:"bottle",p:25}]},
+   prices:[{label:"copa",p:4.5},{label:"botella",p:25}]},
   {cat:"Cerveza",name:"Águila",hasIngr:false,
-   prices:[{es:"pinta",en:"pint",p:5.3},{es:"doble",en:"half pint",p:3.7}]},
+   prices:[{label:"pinta",p:5.3},{label:"doble",p:3.7}]},
   {cat:"Cerveza",name:"Águila Sin Filtrar",hasIngr:false,
-   prices:[{es:"pinta",en:"pint",p:5.5},{es:"doble",en:"half pint",p:4}]},
+   prices:[{label:"pinta",p:5.5},{label:"doble",p:4}]},
   {cat:"Cerveza",name:"18/70",hasIngr:false,
-   prices:[{es:"tercio",en:"bottle (33cl)",p:3.7}]},
+   prices:[{label:"tercio",p:3.7}]},
   {cat:"Cerveza",name:"Amstel 0.0",hasIngr:false,
-   prices:[{es:"tercio",en:"bottle (33cl)",p:3.5}]},
+   prices:[{label:"tercio",p:3.5}]},
   {cat:"Cerveza",name:"Amstel Radler",hasIngr:false,
-   prices:[{es:"tercio",en:"bottle (33cl)",p:3.5}]},
+   prices:[{label:"tercio",p:3.5}]},
   {cat:"Cerveza",name:"Cruzcampo Sin Gluten",hasIngr:false,
-   prices:[{es:"tercio",en:"bottle (33cl)",p:4}]},
+   prices:[{label:"tercio",p:4}]},
   {cat:"Cerveza",name:"Paulaner",hasIngr:false,
-   prices:[{es:"pinta",en:"pint",p:5.5},{es:"doble",en:"half pint",p:4}]},
+   prices:[{label:"pinta",p:5.5},{label:"doble",p:4}]},
   {cat:"Cerveza",name:"IPA Lagunitas",hasIngr:false,
-   prices:[{es:"botella",en:"bottle",p:5.5}]},
+   prices:[{label:"botella",p:5.5}]},
   {cat:"Cerveza",name:"Guinness",hasIngr:false,
-   prices:[{es:"pinta",en:"pint",p:5.5}]},
+   prices:[{label:"pinta",p:5.5}]},
   {cat:"Cerveza",name:"Heineken",hasIngr:false,
-   prices:[{es:"tercio",en:"bottle (33cl)",p:3.5}]},
+   prices:[{label:"tercio",p:3.5}]},
   {cat:"Micheladas",name:"Michelada Berlín",hasIngr:true,ingr:["Cerveza","Zumo de limón","Sal","Salsa inglesa","Tabasco"],
-   prices:[{es:"500 ml",en:"500 ml",p:8}]},
+   prices:[{label:"500 ml",p:8}]},
   {cat:"Micheladas",name:"Michelada de Tequila",hasIngr:true,ingr:["Cerveza","Tequila","Bitter habanero","Zumo de limón","Sal"],
-   prices:[{es:"500 ml",en:"500 ml",p:9}]},
+   prices:[{label:"500 ml",p:9}]},
   {cat:"Comida",name:"Patatas bolsa",hasIngr:false,
-   prices:[{es:"ración",en:"serving",p:1.5}]},
+   prices:[{label:"ración",p:1.5}]},
   {cat:"Comida",name:"Aceitunas",hasIngr:false,
-   prices:[{es:"ración",en:"serving",p:2}]},
+   prices:[{label:"ración",p:2}]},
   {cat:"Comida",name:"Tabla de jamón Gargallo",hasIngr:false,
-   prices:[{es:"tabla",en:"board",p:12}]},
+   prices:[{label:"tabla",p:12}]},
   {cat:"Refrescos",name:"Pepsi",hasIngr:false,
-   prices:[{es:"lata/botella",en:"can/bottle",p:3}]},
+   prices:[{label:"lata/botella",p:3}]},
   {cat:"Refrescos",name:"Pepsi Zero",hasIngr:false,
-   prices:[{es:"lata/botella",en:"can/bottle",p:3}]},
+   prices:[{label:"lata/botella",p:3}]},
   {cat:"Refrescos",name:"Schweppes Limón",hasIngr:false,
-   prices:[{es:"lata/botella",en:"can/bottle",p:3}]},
+   prices:[{label:"lata/botella",p:3}]},
   {cat:"Refrescos",name:"Tónica Schweppes",hasIngr:false,
-   prices:[{es:"lata/botella",en:"can/bottle",p:3}]},
+   prices:[{label:"lata/botella",p:3}]},
   {cat:"Refrescos",name:"Ginger Beer",hasIngr:false,
-   prices:[{es:"botella",en:"bottle",p:3.5}]},
+   prices:[{label:"botella",p:3.5}]},
   {cat:"Refrescos",name:"Red Bull",hasIngr:false,
-   prices:[{es:"lata",en:"can",p:3.5}]},
+   prices:[{label:"lata",p:3.5}]},
   {cat:"Refrescos",name:"Agua Lanjarón",hasIngr:false,
-   prices:[{es:"botella",en:"bottle",p:3}]},
+   prices:[{label:"botella",p:3}]},
   {cat:"Refrescos",name:"Agua con gas Perrier",hasIngr:false,
-   prices:[{es:"botella",en:"bottle",p:3}]},
+   prices:[{label:"botella",p:3}]},
 ];
 
+const CDN = "https://marieberezhna.github.io/cafeberlin";
 const IMAGES = {
-  "Licores": "https://marieberezhna.github.io/cafeberlin/liqueurs/licores.webp",
-  "Licor de arroz": "https://marieberezhna.github.io/cafeberlin/liqueurs/licor_de_arroz.webp",
-  "Jägermeister": "https://marieberezhna.github.io/cafeberlin/liqueurs/jagermeister.webp",
-  "Jack Fire": "https://marieberezhna.github.io/cafeberlin/liqueurs/jack_fire.webp",
-  "Cazalla": "https://marieberezhna.github.io/cafeberlin/liqueurs/cazalla.webp",
-  "Baileys": "https://marieberezhna.github.io/cafeberlin/liqueurs/baileys.webp",
-  "Amaretto": "https://marieberezhna.github.io/cafeberlin/liqueurs/amaretto.webp",
-  "Limoncello": "https://marieberezhna.github.io/cafeberlin/liqueurs/Limoncello.webp",
-  "Vittore Rojo": "https://marieberezhna.github.io/cafeberlin/vermouth/vittore_rojo.webp",
-  "Vittore Blanco": "https://marieberezhna.github.io/cafeberlin/vermouth/vittore_blanco.webp",
-  "Vermut": "https://marieberezhna.github.io/cafeberlin/vermouth/vermut.webp",
-  "Noilly Prat Blanco Seco": "https://marieberezhna.github.io/cafeberlin/vermouth/nolly_prat_blanco_seco.webp",
-  "Martini Reserva Rubino": "https://marieberezhna.github.io/cafeberlin/vermouth/martini_reserva_rubino.webp",
-  "Martini Reserva Ambrato": "https://marieberezhna.github.io/cafeberlin/vermouth/martini_reserva_ambrato.webp",
-  "Agua con gas Perrier": "https://marieberezhna.github.io/cafeberlin/refrescos/perrier.webp",
-  "Vino blanco": "https://marieberezhna.github.io/cafeberlin/wine/vino_blanco.webp",
-  "Vino": "https://marieberezhna.github.io/cafeberlin/wine/vinos.webp",
-  "Ramón Bilbao Rioja": "https://marieberezhna.github.io/cafeberlin/wine/ramon_bilbao_rioja.webp",
-  "Bollinger Spécial Cuvée": "https://marieberezhna.github.io/cafeberlin/wine/bollinger_special_cuvee.webp",
-  "Pepsi": "https://marieberezhna.github.io/cafeberlin/refrescos/pepsi.webp",
-  "Pepsi Zero": "https://marieberezhna.github.io/cafeberlin/refrescos/pepsi_zero.webp",
-  "Red Bull": "https://marieberezhna.github.io/cafeberlin/refrescos/red_bull.webp",
-  "Tónica Schweppes": "https://marieberezhna.github.io/cafeberlin/refrescos/tonica_schweppes.webp",
-  "Agua Lanjarón": "https://marieberezhna.github.io/cafeberlin/refrescos/lanjaron.webp",
-  "Schweppes Limón": "https://marieberezhna.github.io/cafeberlin/refrescos/schweppes_limon.webp",
-  "Schweppes limón": "https://marieberezhna.github.io/cafeberlin/refrescos/schweppes_limon.webp",
-  "Vino tinto": "https://marieberezhna.github.io/cafeberlin/wine/vino_tinto.webp",
-  "Guinness": "https://marieberezhna.github.io/cafeberlin/beer/guinness.webp",
-  "Cerveza": "https://marieberezhna.github.io/cafeberlin/beer/beer.webp",
-  "Paulaner": "https://marieberezhna.github.io/cafeberlin/beer/paulaner.webp",
-  "Águila": "https://marieberezhna.github.io/cafeberlin/beer/aguila.webp",
-  "Águila Sin Filtrar": "https://marieberezhna.github.io/cafeberlin/beer/aquila_sin_filtrar.webp",
-  "18/70": "https://marieberezhna.github.io/cafeberlin/beer/1870.webp",
-  "Amstel 0.0": "https://marieberezhna.github.io/cafeberlin/beer/amstel00.webp",
-  "Amstel Radler": "https://marieberezhna.github.io/cafeberlin/beer/amstel_radler.webp",
-  "Cruzcampo Sin Gluten": "https://marieberezhna.github.io/cafeberlin/beer/cruzcampo_sin_gluten.webp",
-  "IPA Lagunitas": "https://marieberezhna.github.io/cafeberlin/beer/ipa_lagunitas.webp",
-  "Heineken": "https://marieberezhna.github.io/cafeberlin/beer/heineken.webp",
-  "Brut Cava": "https://marieberezhna.github.io/cafeberlin/wine/cava_brut.webp",
-  "Ladrón de Lunas Blanco": "https://marieberezhna.github.io/cafeberlin/wine/ladron_de_lunas.webp",
-  "Ovejita Tinto": "https://marieberezhna.github.io/cafeberlin/wine/obejita_tinto.webp",
-  "Ginger Beer": "https://marieberezhna.github.io/cafeberlin/refrescos/ginger_beer_schweppes.webp",
-  "Ginger beer": "https://marieberezhna.github.io/cafeberlin/refrescos/ginger_beer_schweppes.webp",
-  "Ovejita verde Verdejo": "https://marieberezhna.github.io/cafeberlin/wine/obejita_blanco_verde.webp",
+  "Licores": `${CDN}/liqueurs/licores.webp`,
+  "Licor de arroz": `${CDN}/liqueurs/licor_de_arroz.webp`,
+  "Jägermeister": `${CDN}/liqueurs/jagermeister.webp`,
+  "Jack Fire": `${CDN}/liqueurs/jack_fire.webp`,
+  "Cazalla": `${CDN}/liqueurs/cazalla.webp`,
+  "Baileys": `${CDN}/liqueurs/baileys.webp`,
+  "Amaretto": `${CDN}/liqueurs/amaretto.webp`,
+  "Limoncello": `${CDN}/liqueurs/Limoncello.webp`,
+  "Vittore Rojo": `${CDN}/vermouth/vittore_rojo.webp`,
+  "Vittore Blanco": `${CDN}/vermouth/vittore_blanco.webp`,
+  "Vermut": `${CDN}/vermouth/vermut.webp`,
+  "Noilly Prat Blanco Seco": `${CDN}/vermouth/nolly_prat_blanco_seco.webp`,
+  "Martini Reserva Rubino": `${CDN}/vermouth/martini_reserva_rubino.webp`,
+  "Martini Reserva Ambrato": `${CDN}/vermouth/martini_reserva_ambrato.webp`,
+  "Agua con gas Perrier": `${CDN}/refrescos/perrier.webp`,
+  "Vino blanco": `${CDN}/wine/vino_blanco.webp`,
+  "Vino": `${CDN}/wine/vinos.webp`,
+  "Ramón Bilbao Rioja": `${CDN}/wine/ramon_bilbao_rioja.webp`,
+  "Bollinger Spécial Cuvée": `${CDN}/wine/bollinger_special_cuvee.webp`,
+  "Pepsi": `${CDN}/refrescos/pepsi.webp`,
+  "Pepsi Zero": `${CDN}/refrescos/pepsi_zero.webp`,
+  "Red Bull": `${CDN}/refrescos/red_bull.webp`,
+  "Tónica Schweppes": `${CDN}/refrescos/tonica_schweppes.webp`,
+  "Agua Lanjarón": `${CDN}/refrescos/lanjaron.webp`,
+  "Schweppes Limón": `${CDN}/refrescos/schweppes_limon.webp`,
+  "Schweppes limón": `${CDN}/refrescos/schweppes_limon.webp`,
+  "Vino tinto": `${CDN}/wine/vino_tinto.webp`,
+  "Guinness": `${CDN}/beer/guinness.webp`,
+  "Cerveza": `${CDN}/beer/beer.webp`,
+  "Paulaner": `${CDN}/beer/paulaner.webp`,
+  "Águila": `${CDN}/beer/aguila.webp`,
+  "Águila Sin Filtrar": `${CDN}/beer/aquila_sin_filtrar.webp`,
+  "18/70": `${CDN}/beer/1870.webp`,
+  "Amstel 0.0": `${CDN}/beer/amstel00.webp`,
+  "Amstel Radler": `${CDN}/beer/amstel_radler.webp`,
+  "Cruzcampo Sin Gluten": `${CDN}/beer/cruzcampo_sin_gluten.webp`,
+  "IPA Lagunitas": `${CDN}/beer/ipa_lagunitas.webp`,
+  "Heineken": `${CDN}/beer/heineken.webp`,
+  "Brut Cava": `${CDN}/wine/cava_brut.webp`,
+  "Ladrón de Lunas Blanco": `${CDN}/wine/ladron_de_lunas.webp`,
+  "Ovejita Tinto": `${CDN}/wine/obejita_tinto.webp`,
+  "Ginger Beer": `${CDN}/refrescos/ginger_beer_schweppes.webp`,
+  "Ginger beer": `${CDN}/refrescos/ginger_beer_schweppes.webp`,
+  "Ovejita verde Verdejo": `${CDN}/wine/obejita_blanco_verde.webp`,
 
 };
 
@@ -400,29 +394,16 @@ const FILTER_TYPES = ["ingredients","price","category","name"];
 const FILTER_LABELS    = {ingredients:"Ingredientes",price:"Precio",category:"Categoría",name:"Nombre"};
 const FILTER_LABELS_EN = {ingredients:"Ingredients",price:"Price",category:"Category",name:"Name"};
 const Q_META = {
-  ingredients:  {l:"¿Qué lleva?",    e:"What's in it?"},
-  ingredients2: {l:"¿Cuál más?",     e:"What else?"},
-  ingredients3: {l:"¿Cuál NO lleva?",e:"What's NOT in it?"},
-  price:        {l:"Precio exacto",   e:"Exact price"},
-  ratio:        {l:"Ratio",           e:"Ratio"},
-  category:     {l:"Categoría",       e:"Category"},
-  name:         {l:"Nombre",          e:"Name"},
+  ingredients:  {l:"¿Qué lleva?"},
+  ingredients2: {l:"¿Cuál más?"},
+  ingredients3: {l:"¿Cuál NO lleva?"},
+  price:        {l:"Precio exacto"},
+  ratio:        {l:"Ratio"},
+  category:     {l:"Categoría"},
+  name:         {l:"Nombre"},
 };
 
 let activeTab="Coctelería clásica", activeFilters=new Set(FILTER_TYPES);
-let lang = 'es';
-
-function setLang(l){
-  lang = l;
-  document.getElementById('btnES').classList.toggle('active', l==='es');
-  document.getElementById('btnEN').classList.toggle('active', l==='en');
-  document.getElementById('btnTest').textContent  = l==='es' ? '🎯 Test' : '🎯 Test';
-  document.getElementById('btnLearn').textContent = l==='es' ? '📖 Aprender' : '📖 Learn';
-  if(appMode==='test') startQuiz();
-  else startLearn();
-}
-
-function t(q, field){ return lang==='en' ? q[field+'_en'] : q[field+'_es']; }
 let questions=[], cur=0, score=0, answered=false;
 
 const sh   = a=>[...a].sort(()=>Math.random()-.5);
@@ -444,32 +425,26 @@ function makeQs(){
       const c1=item.ingr[Math.floor(Math.random()*item.ingr.length)];
       const w1=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i))).slice(0,3);
       if(w1.length>=3) res.push({qtype:"ingredients",img:IMAGES[item.name]||null,
-        q_es:`¿Cuál de estos ingredientes lleva el ${item.name}?`,
-        q_en:`Which of these is in the ${item.name}?`,
+        q:`¿Cuál de estos ingredientes lleva el ${item.name}?`,
         opts:sh([c1,...w1]),answer:c1,cat:item.cat,
-        hint_es:`${item.name}: ${item.ingr.join(", ")}`,
-        hint_en:`${item.name}: ${item.ingr.join(", ")}`});
+        hint:`${item.name}: ${item.ingr.join(", ")}`});
       // Type 2: complete the recipe
       if(item.ingr.length>=3){
         const s=sh(item.ingr); const shown=s.slice(0,2),c2=s[2];
         const w2=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i))).slice(0,3);
         if(w2.length>=3) res.push({qtype:"ingredients2",img:IMAGES[item.name]||null,
-          q_es:`El ${item.name} lleva ${shown.join(" y ")}… ¿cuál más?`,
-          q_en:`${item.name} has ${shown.join(" and ")}… which else?`,
+          q:`El ${item.name} lleva ${shown.join(" y ")}… ¿cuál más?`,
           opts:sh([c2,...w2]),answer:c2,cat:item.cat,
-          hint_es:`${item.name}: ${item.ingr.join(", ")}`,
-          hint_en:`${item.name}: ${item.ingr.join(", ")}`});
+          hint:`${item.name}: ${item.ingr.join(", ")}`});
       }
       // Type 3: which is NOT an ingredient
       if(item.ingr.length>=3){
         const intruder=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i)))[0];
         const decoys=sh(item.ingr).slice(0,3);
         if(intruder&&decoys.length>=3) res.push({qtype:"ingredients3",img:IMAGES[item.name]||null,
-          q_es:`¿Cuál de estos NO lleva el ${item.name}?`,
-          q_en:`Which of these is NOT in the ${item.name}?`,
+          q:`¿Cuál de estos NO lleva el ${item.name}?`,
           opts:sh([intruder,...decoys]),answer:intruder,cat:item.cat,
-          hint_es:`${item.name} lleva: ${item.ingr.join(", ")}`,
-          hint_en:`${item.name} contains: ${item.ingr.join(", ")}`});
+          hint:`${item.name} lleva: ${item.ingr.join(", ")}`});
       }
     });
   }
@@ -481,14 +456,11 @@ function makeQs(){
         // Wrong options: other prices from the whole menu, excluding the correct value
         const wrongPs=sh(UNIQUE_PRICES.filter(p=>p!==serving.p)).slice(0,3);
         const allOpts=sh([serving.p,...wrongPs]).map(fmt);
-        const hint_parts=item.prices.map(s=>`${s.es}: ${fmt(s.p)}`).join(" · ");
-        const hint_parts_en=item.prices.map(s=>`${s.en}: ${fmt(s.p)}`).join(" · ");
+        const hint_parts=item.prices.map(s=>`${s.label}: ${fmt(s.p)}`).join(" · ");
         res.push({qtype:"price",img:IMAGES[item.name]||null,
-          q_es:`¿Cuánto cuesta el ${item.name} (${serving.es})?`,
-          q_en:`How much is the ${item.name} (${serving.en})?`,
+          q:`¿Cuánto cuesta el ${item.name} (${serving.label})?`,
           opts:allOpts, answer:fmt(serving.p), cat:item.cat,
-          hint_es:`${item.name} — ${hint_parts}`,
-          hint_en:`${item.name} — ${hint_parts_en}`});
+          hint:`${item.name} — ${hint_parts}`});
       });
     });
   }
@@ -499,11 +471,9 @@ function makeQs(){
     pool.forEach(item=>{
       const wrongCats=sh(allCats.filter(c=>c!==item.cat)).slice(0,3);
       res.push({qtype:"category",img:IMAGES[item.name]||null,
-        q_es:`¿En qué sección está el ${item.name}?`,
-        q_en:`Which section is ${item.name} in?`,
+        q:`¿En qué sección está el ${item.name}?`,
         opts:sh([item.cat,...wrongCats]),answer:item.cat,cat:item.cat,
-        hint_es:`${item.name} está en "${item.cat}"`,
-        hint_en:`${item.name} is in "${item.cat}"`});
+        hint:`${item.name} está en "${item.cat}"`});
     });
   }
 
@@ -536,11 +506,9 @@ function makeQs(){
       }
       if(otherRatios.length >= 1){
         res.push({qtype:"ratio", img:IMAGES[item.name]||null,
-          q_es:`¿Cuál es el ratio del ${item.name}?`,
-          q_en:`What is the ratio for the ${item.name}?`,
+          q:`¿Cuál es el ratio del ${item.name}?`,
           opts:sh([correct,...otherRatios.slice(0,3)]), answer:correct, cat:item.cat,
-          hint_es:`${item.name}: ${correct}`,
-          hint_en:`${item.name}: ${correct}`});
+          hint:`${item.name}: ${correct}`});
       }
     });
   }
@@ -566,11 +534,9 @@ function makeQs(){
 
       const wrongNames=sh(cocktailItems.filter(x=>x.name!==item.name)).slice(0,3).map(x=>x.name);
       if(wrongNames.length>=3) res.push({qtype:"name",img:IMAGES[item.name]||null,
-        q_es:`¿Qué cóctel lleva ${clue.join(" y ")}?`,
-        q_en:`Which cocktail has ${clue.join(" and ")}?`,
+        q:`¿Qué cóctel lleva ${clue.join(" y ")}?`,
         opts:sh([item.name,...wrongNames]),answer:item.name,cat:item.cat,
-        hint_es:`${item.name}: ${item.ingr.join(", ")}`,
-        hint_en:`${item.name}: ${item.ingr.join(", ")}`});
+        hint:`${item.name}: ${item.ingr.join(", ")}`});
     });
   }
 
@@ -618,8 +584,7 @@ function render(){
     <div class="qcard">
       <div class="qtype">${m.l} / ${m.e}<span class="qtag">${q.cat}</span></div>
       ${imgHtml}
-      <div class="qtext">${q.q_es}</div>
-      <div class="qtrans">${q.q_en}</div>
+      <div class="qtext">${q.q}</div>
       <div class="${q.opts.some(o=>IMAGES[o])?'opts-img':'opts'}" id="optsdiv">
         ${q.opts.map(o=>{
           const img=IMAGES[o];
@@ -648,8 +613,8 @@ function choose(btn,chosen,correct){
   const fb=document.getElementById("fb");
   fb.style.display="block";
   fb.innerHTML=ok
-    ?`<strong>✓ Correcto!</strong><br><span>${q.hint_es}<br><em>${q.hint_en}</em></span>`
-    :`<strong>✗ Incorrecto</strong> — respuesta: <strong>${correct}</strong><br><span>${q.hint_es}<br><em>${q.hint_en}</em></span>`;
+    ?`<strong>✓ Correcto!</strong><br><span>${q.hint}</span>`
+    :`<strong>✗ Incorrecto</strong> — respuesta: <strong>${correct}</strong><br><span>${q.hint}</span>`;
   document.getElementById("nav").style.display="flex";
   updateMeta();
 }
@@ -661,12 +626,11 @@ function renderEnd(){
   const pct=Math.round(score/questions.length*100);
   const e=pct>=80?"🏆":pct>=50?"👍":"📚";
   const m_es=pct>=80?"¡Eres un experto de la carta!":pct>=50?"Buen trabajo, sigue practicando.":"Hay que estudiar más la carta.";
-  const m_en=pct>=80?"You're a menu expert!":pct>=50?"Good job, keep practicing!":"More menu studying needed!";
   document.getElementById("area").innerHTML=`
     <div class="qcard end">
       <div class="big">${e}</div>
       <div class="sc">${score} / ${questions.length}</div>
-      <p>${m_es}<br><em>${m_en}</em></p>
+      <p>${m_es}</p>
       <div class="nav" style="margin-top:1.5rem;display:flex">
         <button class="pri" onclick="startQuiz()">Jugar de nuevo / Play again</button>
       </div>
@@ -730,10 +694,10 @@ function renderOverview(){
           const col = GRP_COLOR[ingrGroup(ing)] || GRP_COLOR.other;
           return `<span style="color:${col}">${ing}${dose}</span>`;
         }).join('<span style="color:#3a3835"> · </span>')}</div>` : '';
-    const methodLine = (item.method_es || item.method_en)
-      ? `<div style="font-size:12px;margin-top:6px;border-top:0.5px solid rgba(232,230,225,0.1);padding-top:6px">${lang==="en"?"Method":"Método"} <span style="color:#8FC1E0;font-weight:600">${lang==='en' ? (item.method_en||item.method_es) : (item.method_es||item.method_en)}</span></div>` : '';
-    const glassName = item[`glass_${lang}`] || item.glass_es || item.glass_en || null;
-    const glassImg = glassName ? IMAGES[`glass:${item.glass_es||item.glass_en}`] : null;
+    const methodLine = item.method
+      ? `<div style="font-size:12px;margin-top:6px;border-top:0.5px solid rgba(232,230,225,0.1);padding-top:6px">${"Método"} <span style="color:#8FC1E0;font-weight:600">${item.method||""}</span></div>` : '';
+    const glassName = item.glass || null;
+    const glassImg = glassName ? IMAGES[`glass:${item.glass}`] : null;
     const glassHtml = glassName
       ? `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;min-width:52px">
           ${glassImg
@@ -814,31 +778,25 @@ function genIngrQ(item){
       const correct=item.ingr[Math.floor(Math.random()*item.ingr.length)];
       const wrongs=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i))).slice(0,3);
       if(wrongs.length>=3) return {qtype:t,
-        q_es:`¿Cuál de estos ingredientes lleva el ${item.name}?`,
-        q_en:`Which of these is in the ${item.name}?`,
+        q:`¿Cuál de estos ingredientes lleva el ${item.name}?`,
         opts:sh([correct,...wrongs]),answer:correct,
-        hint_es:`${item.name}: ${item.ingr.join(", ")}`,
-        hint_en:`${item.name}: ${item.ingr.join(", ")}`};
+        hint:`${item.name}: ${item.ingr.join(", ")}`};
     }
     if(t==='ingredients2' && item.ingr.length>=3){
       const s=sh(item.ingr); const shown=s.slice(0,2),c2=s[2];
       const wrongs=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i))).slice(0,3);
       if(wrongs.length>=3) return {qtype:t,
-        q_es:`El ${item.name} lleva ${shown.join(" y ")}… ¿cuál más?`,
-        q_en:`${item.name} has ${shown.join(" and ")}… which else?`,
+        q:`El ${item.name} lleva ${shown.join(" y ")}… ¿cuál más?`,
         opts:sh([c2,...wrongs]),answer:c2,
-        hint_es:`${item.name}: ${item.ingr.join(", ")}`,
-        hint_en:`${item.name}: ${item.ingr.join(", ")}`};
+        hint:`${item.name}: ${item.ingr.join(", ")}`};
     }
     if(t==='ingredients3' && item.ingr.length>=3){
       const intruder=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i)))[0];
       const decoys=sh(item.ingr).slice(0,3);
       if(intruder&&decoys.length>=3) return {qtype:t,
-        q_es:`¿Cuál de estos NO lleva el ${item.name}?`,
-        q_en:`Which of these is NOT in the ${item.name}?`,
+        q:`¿Cuál de estos NO lleva el ${item.name}?`,
         opts:sh([intruder,...decoys]),answer:intruder,
-        hint_es:`${item.name} lleva: ${item.ingr.join(", ")}`,
-        hint_en:`${item.name} contains: ${item.ingr.join(", ")}`};
+        hint:`${item.name} lleva: ${item.ingr.join(", ")}`};
     }
   }
   return null;
@@ -849,14 +807,11 @@ function genPriceQ(item){
   const serving = item.prices[Math.floor(Math.random()*item.prices.length)];
   const wrongPs = sh(UNIQUE_PRICES.filter(p=>p!==serving.p)).slice(0,3);
   if(wrongPs.length<3) return null;
-  const hint_parts = item.prices.map(s=>`${s.es}: ${fmt(s.p)}`).join(" · ");
-  const hint_parts_en = item.prices.map(s=>`${s.en}: ${fmt(s.p)}`).join(" · ");
+  const hint_parts = item.prices.map(s=>`${s.label}: ${fmt(s.p)}`).join(" · ");
   return {qtype:'price',
-    q_es:`¿Cuánto cuesta el ${item.name} (${serving.es})?`,
-    q_en:`How much is the ${item.name} (${serving.en})?`,
+    q:`¿Cuánto cuesta el ${item.name} (${serving.label})?`,
     opts:sh([serving.p,...wrongPs]).map(fmt),answer:fmt(serving.p),
-    hint_es:`${item.name} — ${hint_parts}`,
-    hint_en:`${item.name} — ${hint_parts_en}`};
+    hint:`${item.name} — ${hint_parts}`};
 }
 
 function genQuizQueue(item){
@@ -908,8 +863,7 @@ function renderLearnQuiz(item){
     <div class="learn-card">
       <div class="learn-counter">Práctica · ${learnIdx+1} / ${learnQueue.length}${quizQueue.length>1?` · ${quizQueueIdx+1}/${quizQueue.length}`:''}</div>
       <div class="qtype">${Q_META[q.qtype].l} / ${Q_META[q.qtype].e}<span class="qtag">${item.name}</span></div>
-      <div class="qtext">${q.q_es}</div>
-      <div class="qtrans">${q.q_en}</div>
+      <div class="qtext">${q.q}</div>
       <div class="${optsClass}">${optsHtml}</div>
       <div class="fb" id="fb"></div>
     </div>
@@ -934,8 +888,8 @@ function chooseLearn(btn, chosen, correct){
   const fb=document.getElementById('fb');
   fb.style.display='block';
   fb.innerHTML = ok
-    ? `<strong>✓ Correcto!</strong><br><span>${q.hint_es}<br><em>${q.hint_en}</em></span>`
-    : `<strong>✗ Incorrecto</strong> — respuesta: <strong>${correct}</strong><br><span>${q.hint_es}<br><em>${q.hint_en}</em></span>`;
+    ? `<strong>✓ Correcto!</strong><br><span>${q.hint}</span>`
+    : `<strong>✗ Incorrecto</strong> — respuesta: <strong>${correct}</strong><br><span>${q.hint}</span>`;
   document.getElementById('nav').style.display='flex';
 }
 
@@ -971,7 +925,7 @@ function ingrGroup(name){ return INGR_GROUP[name] || "other"; }
 function priceLabel(item){
   if(!item.prices || !item.prices.length) return '';
   if(item.prices.length===1) return fmt(item.prices[0].p);
-  return item.prices.map(s=>`${fmt(s.p)} (${s.es})`).join(' · ');
+  return item.prices.map(s=>`${fmt(s.p)} (${s.label})`).join(' · ');
 }
 
 function renderStudy(item){
@@ -1026,10 +980,10 @@ function renderStudy(item){
         ).join('')}
       </div>` : '';
 
-  const methodHtml = (item.method_es || item.method_en)
+  const methodHtml = item.method
     ? `<div style="margin-top:10px;padding:8px 12px;background:#1a1917;border-radius:8px;border:0.5px solid rgba(232,230,225,0.12);display:flex;align-items:center;gap:8px">
-        <span style="font-size:11px;color:#9a9793;text-transform:uppercase;letter-spacing:.06em">${lang==="en"?"Method":"Método"}</span>
-        <span style="font-size:14px;color:#8FC1E0;font-weight:600">${lang==='en' ? (item.method_en||item.method_es) : (item.method_es||item.method_en)}</span>
+        <span style="font-size:11px;color:#9a9793;text-transform:uppercase;letter-spacing:.06em">${"Método"}</span>
+        <span style="font-size:14px;color:#8FC1E0;font-weight:600">${item.method||""}</span>
       </div>` : '';
 
   document.getElementById('area').innerHTML = `
