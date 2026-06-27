@@ -123,6 +123,7 @@ const RAW = [
    glass:"Collins (tubo)"},
   {cat:"Coctelería clásica",name:"Whiskey Highball",hasIngr:true,
    ingr:["Whisky","Soda","Bitter"],
+   optional:["Bitter"],
    doses:{"Whisky":"2 oz","Soda":"top"},
    method:"Removido",
    glass:"Vaso largo"},
@@ -766,11 +767,29 @@ function renderOverview(){
     const catLabel = activeTab==='Todo' ? `<span style="font-size:11px;color:#9a9793;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">${item.cat}</span>` : '';
     const GRP_COLOR = {spirit:"#F09595",liqueur:"#E0AE6B",filler:"#8FC1E0",bitter:"#C9A0DC",sweet:"#9ECB7A",other:"#9a9793"};
     const ingrLine = item.hasIngr && item.ingr && item.ingr.length
-      ? `<div style="font-size:12px;margin-top:5px;line-height:1.8">${item.ingr.map(ing=>{
-          const dose = item.doses && item.doses[ing] ? `<span style="opacity:.7"> ${item.doses[ing]}</span>` : '';
-          const col = GRP_COLOR[ingrGroup(ing)] || GRP_COLOR.other;
-          return `<span style="color:${col}">${ing}${dose}</span>`;
-        }).join('<span style="color:#3a3835"> · </span>')}</div>` : '';
+      ? `<div style="font-size:14px;margin-top:5px;line-height:1.8">${(() => {
+          const sorted = [...item.ingr].sort((a, b) => {
+            const isGarnishA = GARNISHMENTS.has(a);
+            const isGarnishB = GARNISHMENTS.has(b);
+            if (isGarnishA !== isGarnishB) return isGarnishA ? 1 : -1;
+            const grpA = ingrGroup(a), grpB = ingrGroup(b);
+            const isAlcoholA = grpA === 'spirit' || grpA === 'liqueur';
+            const isAlcoholB = grpB === 'spirit' || grpB === 'liqueur';
+            const hasDoseA = item.doses && item.doses[a];
+            const hasDoseB = item.doses && item.doses[b];
+            if (isAlcoholA !== isAlcoholB) return isAlcoholB ? 1 : -1;
+            if (hasDoseA !== hasDoseB) return hasDoseB ? 1 : -1;
+            return 0;
+          });
+          return sorted.map(ing=>{
+            const dose = item.doses && item.doses[ing] ? `<span style="opacity:.7"> ${item.doses[ing]}</span>` : '';
+            const col = GRP_COLOR[ingrGroup(ing)] || GRP_COLOR.other;
+            const isOpt = item.optional && item.optional.includes(ing);
+            const optStyle = isOpt ? `style="color:${col};opacity:.6;font-style:italic"` : `style="color:${col}"`;
+            const optLabel = isOpt ? '<span style="font-size:10px;opacity:.6"> (optional)</span>' : '';
+            return `<span ${optStyle}>${ing}${dose}</span>${optLabel}`;
+          }).join('<span style="color:#3a3835"> · </span>');
+        })()}</div>` : '';
     const methodLine = item.method
       ? `<div style="font-size:12px;margin-top:6px;border-top:0.5px solid rgba(232,230,225,0.1);padding-top:6px">${"Método"} <span style="color:#8FC1E0;font-weight:600">${item.method||""}</span></div>` : '';
     const glassName = item.glass || null;
@@ -852,7 +871,9 @@ function genIngrQ(item){
   const types = sh(['ingredients','ingredients2','ingredients3']);
   for(const t of types){
     if(t==='ingredients'){
-      const correct=item.ingr[Math.floor(Math.random()*item.ingr.length)];
+      const required = item.ingr.filter(i=>!item.optional || !item.optional.includes(i));
+      if(required.length===0) continue;
+      const correct=required[Math.floor(Math.random()*required.length)];
       const wrongs=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i))).slice(0,3);
       if(wrongs.length>=3) return {qtype:t,
         q:`¿Cuál de estos ingredientes lleva el ${item.name}?`,
@@ -860,7 +881,9 @@ function genIngrQ(item){
         hint:`${item.name}: ${item.ingr.join(", ")}`};
     }
     if(t==='ingredients2' && item.ingr.length>=3){
-      const s=sh(item.ingr); const shown=s.slice(0,2),c2=s[2];
+      const required = item.ingr.filter(i=>!item.optional || !item.optional.includes(i));
+      if(required.length<3) continue;
+      const s=sh(required); const shown=s.slice(0,2),c2=s[2];
       const wrongs=sh(ALL_INGRS.filter(i=>!item.ingr.includes(i))).slice(0,3);
       if(wrongs.length>=3) return {qtype:t,
         q:`El ${item.name} lleva ${shown.join(" y ")}… ¿cuál más?`,
@@ -992,6 +1015,13 @@ const INGR_GROUP = {
   "Azúcar líquido":"sweet","Sirope de vainilla":"sweet","Sirope falernum":"sweet",
   "Sirope pandán":"sweet","Jalea de naranja":"sweet",
 };
+const GARNISHMENTS = new Set([
+  "Hierbabuena","Albahaca","Menta","Romero","Tomillo","Perejil",
+  "Lima","Limón","Naranja","Limón verde","Rodajas de limón","Rodajas de lima",
+  "Coco","Café","Nata","Leche","Foam",
+  "Arándanos","Fresa","Piña","Fruta de la pasión","Lichee","Frutos rojos","Manzana verde",
+  "Calabaza asada","Maracuyá"
+]);
 const GROUP_ORDER = ["spirit","liqueur","filler","bitter","sweet","other"];
 const GROUP_LABELS = {
   spirit:"Alcohol / Spirit", liqueur:"Licores / Liqueurs", filler:"Mixers / Sodas",
@@ -1130,6 +1160,7 @@ function toggleRecall(btn, val){
 function checkRecall(name){
   const item = learnQueue.find(x=>x.name===name);
   const correct = new Set(item.ingr);
+  const optional = new Set(item.optional || []);
   const grid = document.getElementById('recallGrid');
   let hits=0, misses=0, wrongs=0;
 
@@ -1137,17 +1168,20 @@ function checkRecall(name){
     btn.dataset.locked = '1';
     const val = btn.dataset.opt;
     const isCorrect = correct.has(val);
+    const isOptional = optional.has(val);
     const isSelected = recallSelected.has(val);
     if(isCorrect && isSelected){ btn.classList.add('correct'); hits++; }
-    else if(isCorrect && !isSelected){ btn.classList.add('missed'); misses++; }
+    else if(isCorrect && !isSelected && !isOptional){ btn.classList.add('missed'); misses++; }
     else if(!isCorrect && isSelected){ btn.classList.add('wrong'); wrongs++; }
+    else if(isOptional && isSelected){ btn.classList.add('correct'); hits++; }
     btn.classList.remove('selected');
   });
 
+  const required = item.ingr.filter(i => !optional.has(i)).length;
   const perfect = misses===0 && wrongs===0;
   const msg = perfect
     ? '✓ ¡Perfecto! / Perfect!'
-    : `${hits}/${item.ingr.length} ingredientes — ${misses} olvidados, ${wrongs} incorrectos`;
+    : `${hits}/${required} ingredientes — ${misses} olvidados, ${wrongs} incorrectos`;
 
   let nextLabel, nextAction;
   if(learnStage==='main'){
@@ -1156,7 +1190,7 @@ function checkRecall(name){
     nextAction = 'goQuiz()';
   } else {
     // Final review recall — counts toward end-of-session stats
-    recallStats.total += item.ingr.length;
+    recallStats.total += required;
     recallStats.hits += hits;
     recallStats.items++;
     if(perfect) recallStats.perfect++;
