@@ -452,7 +452,7 @@ const IMAGES = {
 
 const ALL_INGRS = [...new Set(RAW.filter(x=>x.hasIngr&&x.ingr).flatMap(x=>x.ingr))];
 // Flat list of all {name, serving_es, serving_en, price} for wrong-answer pool
-const ALL_PRICES_FLAT = RAW.flatMap(x=>x.prices.map(s=>s.p));
+const ALL_PRICES_FLAT = RAW.flatMap(x=>(x.prices||[]).map(s=>s.p));
 const UNIQUE_PRICES = [...new Set(ALL_PRICES_FLAT)];
 
 const CATS = ["Todo",...[...new Set(RAW.map(x=>x.cat))]];
