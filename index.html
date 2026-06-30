@@ -104,6 +104,7 @@ h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#e8e6e1}
     </div>
   </div>
   <div class="tabs-scroll"><div class="tabs" id="tabs"></div></div>
+  <div class="tabs-scroll" id="subtabsWrap" style="display:none"><div class="tabs" id="subtabs"></div></div>
   <div class="filters" id="filters"></div>
   <div class="pbar"><div class="pfill" id="prog" style="width:0%"></div></div>
   <div class="meta" id="metaBar">
@@ -116,62 +117,62 @@ h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#e8e6e1}
 <script>
 // prices: array of {label_es, label_en, price} — one entry per serving format
 const RAW = [
-  {cat:"Coctelería clásica",name:"Mojito",hasIngr:true,
+  {cat:"Coctelería clásica",name:"Mojito",family:"Daiquiri",hasIngr:true,
    ingr:["Hierbabuena","Ron blanco","Zumo de lima","Azúcar líquido","Soda"],
    doses:{"Ron blanco":"1 oz","Zumo de lima":"1 oz","Azúcar líquido":"1 oz"},
    method:"Removido",
    glass:"Collins (tubo)"},
-  {cat:"Coctelería clásica",name:"Whiskey Highball",hasIngr:true,
+  {cat:"Coctelería clásica",name:"Whiskey Highball",family:"Highball",hasIngr:true,
    ingr:["Whisky","Soda", "Bitter"],
-   optional:["Bitter"], // TODO
+   optional:["Bitter"],
    doses:{"Whisky":"2 oz","Soda":"top"},
    method:"Removido",
    glass:"Vaso largo"},
-  {cat:"Coctelería clásica",name:"Screwdriver (Destornillador)",hasIngr:true,
+  {cat:"Coctelería clásica",name:"Screwdriver (Destornillador)",family:"Highball",hasIngr:true,
    ingr:["Vodka","Zumo de naranja"],
    doses:{"Vodka":"2 oz","Zumo de naranja":"top"},
    method:"Removido",
    glass:"Vaso largo"},
-  {cat:"Coctelería clásica",name:"Harvey Wallbanger (Rompetechos)",hasIngr:true,
+  {cat:"Coctelería clásica",name:"Harvey Wallbanger (Rompetechos)",family:"Highball",hasIngr:true,
    ingr:["Vodka","Licor Galliano","Zumo de naranja"],
    doses:{"Vodka":"1 oz","Licor Galliano":"0.5 oz","Zumo de naranja":"top"},
    method:"Removido",
    glass:"Vaso largo"},
-  {cat:"Cócteles – Acid Times",name:"Blue Margarita",hasIngr:true,ingr:["Tequila","Licor Bols Blue Curaçao","Sirope de agave","Zumo de lima"],
+  {cat:"Cócteles de autor",family:"Acid Times",name:"Blue Margarita",hasIngr:true,ingr:["Tequila","Licor Bols Blue Curaçao","Sirope de agave","Zumo de lima"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Acid Times",name:"Brote Primera",hasIngr:true,ingr:["Gin Tanqueray","Licor yuzu","Azúcar líquido","Lima","Albahaca"],
+  {cat:"Cócteles de autor",family:"Acid Times",name:"Brote Primera",hasIngr:true,ingr:["Gin Tanqueray","Licor yuzu","Azúcar líquido","Lima","Albahaca"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Acid Times",name:"Berlin Lemonade",hasIngr:true,ingr:["Jack Daniels Triple Mash","Triple Sec Bols","7UP","Jalea de naranja","Lima"],
+  {cat:"Cócteles de autor",family:"Acid Times",name:"Berlin Lemonade",hasIngr:true,ingr:["Jack Daniels Triple Mash","Triple Sec Bols","7UP","Jalea de naranja","Lima"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Acid Times",name:"Corazón de Luna",hasIngr:true,ingr:["Tequila","Triple Sec Bols","Lima","Lichee"],
+  {cat:"Cócteles de autor",family:"Acid Times",name:"Corazón de Luna",hasIngr:true,ingr:["Tequila","Triple Sec Bols","Lima","Lichee"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Acid Times",name:"Berlín Green",hasIngr:true,ingr:["Vodka","Licor Midori","Albahaca","Manzana verde","Fruta de la pasión"],
+  {cat:"Cócteles de autor",family:"Acid Times",name:"Berlín Green",hasIngr:true,ingr:["Vodka","Licor Midori","Albahaca","Manzana verde","Fruta de la pasión"],
    prices:[{label:"cóctel",p:13}]},
-  {cat:"Cócteles – Sweet Times",name:"Porn Star Martini",hasIngr:true,ingr:["Moskovskaya","Licor Bols Vainilla","Puré de fruta de la pasión","Zumo de lima","Foam"],
+  {cat:"Cócteles de autor",family:"Sweet Times",name:"Porn Star Martini",hasIngr:true,ingr:["Moskovskaya","Licor Bols Vainilla","Puré de fruta de la pasión","Zumo de lima","Foam"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Sweet Times",name:"Éxodo",hasIngr:true,ingr:["Bumbu","Bitter caffè","Sirope pandán","Coco","Café"],
+  {cat:"Cócteles de autor",family:"Sweet Times",name:"Éxodo",hasIngr:true,ingr:["Bumbu","Bitter caffè","Sirope pandán","Coco","Café"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Sweet Times",name:"Rubedo",hasIngr:true,ingr:["Gin","Vermut","Sirope de agave","Lima","Arándanos","Fresa"],
+  {cat:"Cócteles de autor",family:"Sweet Times",name:"Rubedo",hasIngr:true,ingr:["Gin","Vermut","Sirope de agave","Lima","Arándanos","Fresa"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Sweet Times",name:"Génesis",hasIngr:true,ingr:["Ron","Ginger Ale","Azúcar líquido","Lima","Calabaza asada","Naranja"],
+  {cat:"Cócteles de autor",family:"Sweet Times",name:"Génesis",hasIngr:true,ingr:["Ron","Ginger Ale","Azúcar líquido","Lima","Calabaza asada","Naranja"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Sweet Times",name:"Ámbar con cacao",hasIngr:true,ingr:["Ron","Licor Bols Chocolate","Licor Bols Butterscotch","Sirope de vainilla"],
+  {cat:"Cócteles de autor",family:"Sweet Times",name:"Ámbar con cacao",hasIngr:true,ingr:["Ron","Licor Bols Chocolate","Licor Bols Butterscotch","Sirope de vainilla"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Sweet Times",name:"Diego",hasIngr:true,ingr:["Jack Daniels Fire","Licor Bols Yogurt","Licor Bols Butterscotch","Sirope amarena","Zumo de arándanos"],
+  {cat:"Cócteles de autor",family:"Sweet Times",name:"Diego",hasIngr:true,ingr:["Jack Daniels Fire","Licor Bols Yogurt","Licor Bols Butterscotch","Sirope amarena","Zumo de arándanos"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Spicy Times",name:"Bloody Mary",hasIngr:true,ingr:["Moskovskaya","Zumo de tomate","Mix casero"],
+  {cat:"Cócteles de autor",family:"Spicy Times",name:"Bloody Mary",hasIngr:true,ingr:["Moskovskaya","Zumo de tomate","Mix casero"],
    prices:[{label:"cóctel",p:11}]},
-  {cat:"Cócteles – Spicy Times",name:"Moscow Mule",hasIngr:true,ingr:["Moskovskaya","Ginger beer","Zumo de lima"],
+  {cat:"Cócteles de autor",family:"Spicy Times",name:"Moscow Mule",hasIngr:true,ingr:["Moskovskaya","Ginger beer","Zumo de lima"],
    prices:[{label:"cóctel",p:11}]},
-  {cat:"Cócteles – Spicy Times",name:"Paloma Don Julio",hasIngr:true,ingr:["Tequila Don Julio","Soda de pomelo","Sirope de agave","Lima"],
+  {cat:"Cócteles de autor",family:"Spicy Times",name:"Paloma Don Julio",hasIngr:true,ingr:["Tequila Don Julio","Soda de pomelo","Sirope de agave","Lima"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Spicy Times",name:"Matarreyes",hasIngr:true,ingr:["Vodka Smirnoff Tamarindo","Licor de humo","Triple Sec Bols","Sirope de agave","Lima","Maracuyá"],
+  {cat:"Cócteles de autor",family:"Spicy Times",name:"Matarreyes",hasIngr:true,ingr:["Vodka Smirnoff Tamarindo","Licor de humo","Triple Sec Bols","Sirope de agave","Lima","Maracuyá"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Hard Times",name:"Hombro al sol",hasIngr:true,ingr:["Monkey Shoulder","Fino","Bitter de naranja"],
+  {cat:"Cócteles de autor",family:"Hard Times",name:"Hombro al sol",hasIngr:true,ingr:["Monkey Shoulder","Fino","Bitter de naranja"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Hard Times",name:"Polvo de calima",hasIngr:true,ingr:["Diplomático Planas","Ron jamaicano","Chambord","Zumo de naranja","Zumo de piña","Sirope falernum","Zumo de lima"],
+  {cat:"Cócteles de autor",family:"Hard Times",name:"Polvo de calima",hasIngr:true,ingr:["Diplomático Planas","Ron jamaicano","Chambord","Zumo de naranja","Zumo de piña","Sirope falernum","Zumo de lima"],
    prices:[{label:"cóctel",p:12}]},
-  {cat:"Cócteles – Hard Times",name:"Berlin Sling",hasIngr:true,ingr:["Gin Mare","Chambord","Bénédictine DOM","Triple Sec Bols","Piña","Lima"],
+  {cat:"Cócteles de autor",family:"Hard Times",name:"Berlin Sling",hasIngr:true,ingr:["Gin Mare","Chambord","Bénédictine DOM","Triple Sec Bols","Piña","Lima"],
    prices:[{label:"cóctel",p:12},{label:"cóctel con chupito de vodka",p:13}]},
   {cat:"Café Cócteles",name:"Espresso Martini",hasIngr:true,ingr:["Moskovskaya","Licor de café Bols","Bitter de cacao","Sirope de vainilla","Café"],
    prices:[{label:"cóctel",p:11}]},
@@ -534,6 +535,16 @@ const ALL_PRICES_FLAT = RAW.flatMap(x=>(x.prices||[]).map(s=>s.p));
 const UNIQUE_PRICES = [...new Set(ALL_PRICES_FLAT)];
 
 const CATS = ["Todo",...[...new Set(RAW.map(x=>x.cat))]];
+const AUTOR_CAT    = "Cócteles de autor";
+const CLASICA_CAT  = "Coctelería clásica";
+const AUTOR_FAMILIES  = [...new Set(RAW.filter(x=>x.cat===AUTOR_CAT  && x.family).map(x=>x.family))];
+const CLASICA_FAMILIES = [...new Set(RAW.filter(x=>x.cat===CLASICA_CAT && x.family).map(x=>x.family))];
+// badge colors per section type
+const AUTOR_COLOR  = "rgba(240,149,149,0.15)";  // pinkish
+const CLASICA_COLOR = "rgba(138,180,248,0.15)"; // blue-ish
+const AUTOR_TEXT   = "#F09595";
+const CLASICA_TEXT = "#8AB4F8";
+let activeFamily = null; // null = all families
 const FILTER_TYPES = ["ingredients","price","category","name"];
 const FILTER_LABELS    = {ingredients:"Ingredientes",price:"Precio",category:"Categoría",name:"Nombre"};
 const Q_META = {
@@ -553,7 +564,12 @@ const sh   = a=>[...a].sort(()=>Math.random()-.5);
 const pick = (a,n)=>sh(a).slice(0,n);
 const fmt  = p=>`${p.toFixed(2).replace(".",",")} €`;
 
-function getPool(){ return activeTab==="Todo"?RAW:RAW.filter(x=>x.cat===activeTab); }
+const MENU_ONLY = x => x.cat !== "Coctelería clásica";
+function getPool(){
+  let pool = activeTab==="Todo" ? RAW.filter(MENU_ONLY) : RAW.filter(x=>x.cat===activeTab);
+  if(activeFamily) pool = pool.filter(x=>x.family===activeFamily);
+  return pool;
+}
 
 function makeQs(){
   const pool=getPool();
@@ -696,6 +712,15 @@ function buildTabs(){
   document.getElementById("tabs").innerHTML=CATS.map(c=>
     `<button class="tab${c===activeTab?" active":""}" onclick="setTab('${c.replace(/'/g,"\\'")}')">${c}</button>`
   ).join("");
+  const hasSubtabs = activeTab===AUTOR_CAT || activeTab===CLASICA_CAT;
+  const subtabFamilies = activeTab===AUTOR_CAT ? AUTOR_FAMILIES : activeTab===CLASICA_CAT ? CLASICA_FAMILIES : [];
+  document.getElementById("subtabsWrap").style.display = hasSubtabs ? '' : 'none';
+  if(hasSubtabs){
+    document.getElementById("subtabs").innerHTML=
+      [`<button class="tab${activeFamily===null?" active":""}" onclick="setFamily(null)">Todos</button>`,
+       ...subtabFamilies.map(f=>`<button class="tab${activeFamily===f?" active":""}" onclick="setFamily('${f.replace(/'/g,"\\'")}')">${f}</button>`)
+      ].join("");
+  }
 }
 function buildFilters(){
   const btns=FILTER_TYPES.map(t=>
@@ -703,7 +728,14 @@ function buildFilters(){
   ).join("");
   document.getElementById("filters").innerHTML=`<span class="filter-label">🔍 Tipo:</span>${btns}`;
 }
-function setTab(c){activeTab=c;buildTabs();if(appMode==='learn')startLearn();else startQuiz();}
+function setFamily(f){ activeFamily=f; buildTabs(); if(appMode==='learn') startLearn(); else startQuiz(); }
+function familyBadgeHtml(item){
+  if(!item.family) return '';
+  const bg   = item.cat===CLASICA_CAT ? CLASICA_COLOR : AUTOR_COLOR;
+  const col  = item.cat===CLASICA_CAT ? CLASICA_TEXT  : AUTOR_TEXT;
+  return `<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:${bg};color:${col};letter-spacing:.04em;text-transform:uppercase">${item.family}</span>`;
+}
+function setTab(c){ activeTab=c; activeFamily=null; buildTabs(); if(appMode==='learn')startLearn(); else startQuiz(); }
 function toggleFilter(t){
   if(activeFilters.has(t)&&activeFilters.size===1)return;
   activeFilters.has(t)?activeFilters.delete(t):activeFilters.add(t);
@@ -802,7 +834,9 @@ let recallStats = {hits:0, total:0, perfect:0, items:0};
 
 function getLearnPool(){
   const cats = activeTab==='Todo' ? null : activeTab;
-  return RAW.filter(x=> !cats || x.cat===cats);
+  let pool = RAW.filter(x=> (!cats || x.cat===cats) && (cats || MENU_ONLY(x)));
+  if(activeFamily) pool = pool.filter(x=>x.family===activeFamily);
+  return pool;
 }
 
 function startLearn(){
@@ -816,7 +850,7 @@ function startLearn(){
 }
 
 function renderOverview(){
-  const cat = activeTab==='Todo' ? 'Todo el menú' : activeTab;
+  const cat = activeFamily ? activeFamily : (activeTab==='Todo' ? 'Todo el menú' : activeTab);
   const getMinPrice = item => item.prices && item.prices.length ? Math.min(...item.prices.map(p=>p.p)) : 9999;
   const items = [...learnQueue].sort((a,b) => {
     const pa = getMinPrice(a), pb = getMinPrice(b);
@@ -828,7 +862,8 @@ function renderOverview(){
   const cardsHtml = items.map((item,i)=>{
     const img = IMAGES[item.name];
     const price = priceLabel(item);
-    const catLabel = activeTab==='Todo' ? `<span style="font-size:11px;color:#9a9793;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">${item.cat}</span>` : '';
+    const familyBadge = item.family ? familyBadgeHtml(item)+" " : '';
+    const catLabel = activeTab==='Todo' ? `<div style="margin-bottom:3px">${familyBadge}<span style="font-size:11px;color:#9a9793;text-transform:uppercase;letter-spacing:.04em">${item.family ? '' : item.cat}</span></div>` : (item.family ? `<div style="margin-bottom:4px">${familyBadge}</div>` : '');
     const GRP_COLOR = {spirit:"#F09595",liqueur:"#E0AE6B",filler:"#8FC1E0",bitter:"#C9A0DC",sweet:"#9ECB7A",other:"#9a9793"};
     const ingrLine = item.hasIngr && item.ingr && item.ingr.length
       ? `<div style="font-size:14px;margin-top:5px;line-height:1.8">${(() => {
@@ -849,8 +884,8 @@ function renderOverview(){
             const dose = item.doses && item.doses[ing] ? `<span style="opacity:.7"> ${item.doses[ing]}</span>` : '';
             const col = GRP_COLOR[ingrGroup(ing)] || GRP_COLOR.other;
             const isOpt = item.optional && item.optional.includes(ing);
-            const optStyle = isOpt ? `style="color:${col};opacity:.6;font-style:italic"` : `style="color:${col}"`;
-            const optLabel = isOpt ? '<span style="font-size:10px;opacity:.6"> (optional)</span>' : '';
+            const optStyle = isOpt ? `style="color:${col};opacity:.55;font-style:italic"` : `style="color:${col}"`;
+            const optLabel = isOpt ? `<span style="font-size:9px;opacity:.7;font-style:normal;vertical-align:middle"> (opt)</span>` : '';
             return `<span ${optStyle}>${ing}${dose}${optLabel}</span>`;
           }).join('<span style="color:#3a3835"> · </span>');
         })()}</div>` : '';
@@ -884,11 +919,11 @@ function renderOverview(){
     <div style="background:#1a1917;border:1px solid rgba(224,174,107,0.3);border-radius:16px;padding:20px;margin-bottom:16px;text-align:center">
       ${catImg ? `<img src="${catImg}" alt="${cat}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;margin-bottom:12px">` : ''}
       <div style="font-size:22px;font-weight:700;color:#e8e6e1;margin-bottom:4px">${cat}</div>
-      <div style="font-size:13px;color:#9a9793">${items.length} ${items.length===1?'ítem':'ítems'} en esta sección</div>
+      <div style="font-size:13px;color:#9a9793;margin-bottom:14px">${items.length} ${items.length===1?'ítem':'ítems'} en esta sección</div>
+      <button class="pri" style="width:100%;padding:14px;border:none;border-radius:10px;background:#e8e6e1;color:#0f0e0c;font-size:16px;font-weight:700;cursor:pointer" onclick="startLearnMain()">¡Empezar repaso! →</button>
     </div>
     <div style="font-size:12px;color:#9a9793;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-left:2px">📋 Repasa antes de empezar</div>
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">${cardsHtml}</div>
-    <button class="pri" style="width:100%;padding:14px;border:none;border-radius:10px;background:#e8e6e1;color:#0f0e0c;font-size:16px;font-weight:700;cursor:pointer" onclick="startLearnMain()">¡Empezar repaso! →</button>`;
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">${cardsHtml}</div>`;
 }
 
 function startLearnMain(){
@@ -1119,9 +1154,12 @@ function renderStudy(item){
       if(!present.length) return '';
       const colsHtml = present.map(g=>{
         const itemsHtml = byGroup[g].map(ing=>{
+          const isOpt = item.optional && item.optional.includes(ing);
+          const optMark = isOpt ? `<span style="font-size:9px;opacity:.6;font-style:italic"> (opt)</span>` : '';
+          const optStyle = isOpt ? ' style="opacity:.6"' : '';
           const img = IMAGES[ing];
-          if(img) return `<div class="learn-ingr-item"><img src="${img}" alt="${ing}"><span>${ing}</span></div>`;
-          return `<div class="learn-ingr-item no-img"><span>${ing}</span></div>`;
+          if(img) return `<div class="learn-ingr-item"${optStyle}><img src="${img}" alt="${ing}"><span>${ing}${optMark}</span></div>`;
+          return `<div class="learn-ingr-item no-img"${optStyle}><span>${ing}${optMark}</span></div>`;
         }).join('');
         return `<div class="ingr-group grp-${g}">
           <div class="ingr-group-label">${GROUP_LABELS[g]}</div>
@@ -1157,6 +1195,7 @@ function renderStudy(item){
         ${IMAGES[item.name]?`<img style="width:100px;height:100px;object-fit:cover;border-radius:8px;flex-shrink:0" src="${IMAGES[item.name]}" alt="${item.name}">`:'<div style="width:100px;height:100px;background:#2a2926;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0">🍹</div>'}
         <div style="flex:1;min-width:0">
           <div class="learn-name" style="margin:0;font-size:20px">${item.name} <span class="learn-price">${priceLabel(item)}</span></div>
+          ${familyBadgeHtml(item)}
           ${dosesHtml}
           ${methodHtml}
         </div>
