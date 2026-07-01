@@ -92,6 +92,35 @@ h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#e8e6e1}
 .ob-img.ok{background:#27500A;border-color:#97C459;color:#C0DD97}
 .ob-img.bad{background:#791F1F;border-color:#F09595;color:#F7C1C1}
 .qimg{display:block;max-height:150px;max-width:150px;object-fit:contain;border-radius:8px;margin:0 auto 1rem}
+.interactive-shell{background:#1a1917;border:1px solid rgba(232,230,225,0.12);border-radius:16px;overflow:hidden}
+.interactive-header{padding:16px 18px 0;border-bottom:1px solid rgba(232,230,225,0.1)}
+.interactive-wordmark{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#E0AE6B;margin-bottom:10px;font-weight:600}
+.interactive-tabs{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:8px}
+.interactive-tab{padding:8px 12px;border-radius:999px;border:none;background:transparent;color:#8f8b83;font-size:13px;cursor:pointer}
+.interactive-tab.active{background:#2a2926;color:#e8e6e1}
+.interactive-count{padding:8px 18px 0;font-size:12px;color:#9a9793}
+.interactive-layout{display:grid;grid-template-columns:220px 1fr;min-height:520px}
+.interactive-filters{border-right:1px solid rgba(232,230,225,0.1);padding:16px 14px}
+.interactive-filter-section{margin-bottom:16px}
+.interactive-filter-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#E0AE6B;margin-bottom:8px;font-weight:600}
+.interactive-filter-btn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:6px 8px;margin-bottom:4px;border-radius:8px;border:none;background:transparent;color:#b2aea8;font-size:13px;cursor:pointer}
+.interactive-filter-btn:hover{background:#232220;color:#e8e6e1}
+.interactive-filter-btn.active{background:rgba(224,174,107,0.14);color:#E0AE6B}
+.interactive-filter-btn .count{font-size:10px;color:#7a7875}
+.interactive-clear{font-size:10px;color:#7a7875;background:none;border:none;cursor:pointer;padding:2px 0;text-decoration:underline;display:block;margin-top:4px}
+.interactive-clear:hover{color:#e8e6e1}
+.interactive-cards{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;align-content:start}
+.interactive-card{background:#1f1e1b;border:1px solid rgba(232,230,225,0.12);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.interactive-card-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.interactive-card-name{font-size:16px;font-weight:700;color:#e8e6e1;line-height:1.3}
+.interactive-card-price{font-size:12px;color:#E0AE6B;font-weight:600;white-space:nowrap}
+.interactive-card-badges{display:flex;flex-wrap:wrap;gap:6px}
+.interactive-badge{display:inline-block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;font-weight:600}
+.interactive-badge-section{color:#E0AE6B;background:rgba(224,174,107,0.14)}
+.interactive-badge-spirit{color:#9bc7ff;background:rgba(138,180,248,0.14)}
+.interactive-card-desc{font-size:12px;color:#9a9793;line-height:1.55}
+.interactive-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:#9a9793;font-size:14px}
+@media (max-width: 780px){.interactive-layout{grid-template-columns:1fr}.interactive-filters{border-right:none;border-bottom:1px solid rgba(232,230,225,0.1)}}
 </style>
 </head>
 <body>
@@ -101,6 +130,7 @@ h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#e8e6e1}
     <div class="mode-switch" id="modeSwitch">
       <button class="mode-btn" id="btnTest" onclick="setMode('test')">🎯 Test</button>
       <button class="mode-btn active" id="btnLearn" onclick="setMode('learn')">📖 Aprender</button>
+      <button class="mode-btn" id="btnMenu" onclick="setMode('interactive')">🧭 Interactive Menú</button>
     </div>
   </div>
   <div class="tabs-scroll"><div class="tabs" id="tabs"></div></div>
@@ -564,6 +594,89 @@ const sh   = a=>[...a].sort(()=>Math.random()-.5);
 const pick = (a,n)=>sh(a).slice(0,n);
 const fmt  = p=>`${p.toFixed(2).replace(".",",")} €`;
 
+const INTERACTIVE_MENU_SECTIONS = ['Todos','Acid Times','Sweet Times','Spicy Times','Hard Times'];
+const INTERACTIVE_MENU_META = {
+  Todos:{cls:'all'}, 'Acid Times':{cls:'acid'}, 'Sweet Times':{cls:'sweet'}, 'Spicy Times':{cls:'spicy'}, 'Hard Times':{cls:'hard'}
+};
+const MENU_SPIRIT_HINTS = new Set(['Tequila','Tequila Don Julio','Gin','Gin Tanqueray','Gin Mare','Vodka','Moskovskaya','Vodka Smirnoff Tamarindo','Ron','Ron blanco','Ron jamaicano','Bumbu','Diplomático Planas','Jack Daniels Fire','Jack Daniels Triple Mash','Monkey Shoulder','Whisky','Whiskey','Fino']);
+function escHtml(v){ return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function getMainSpirit(item){
+  const ordered = ['Tequila','Gin','Vodka','Ron','Whisky','Whiskey'];
+  for(const known of ordered){ if(item.ingr.includes(known)) return known; }
+  const spiritCandidates = item.ingr.filter(ing => MENU_SPIRIT_HINTS.has(ing));
+  if(spiritCandidates.length) return spiritCandidates[0];
+  const first = item.ingr.find(Boolean);
+  return first || 'Otros';
+}
+function buildInteractiveMenuData(){
+  return RAW.filter(x=>x.cat===AUTOR_CAT && x.hasIngr && x.ingr && x.ingr.length).map(item=>{
+    const section = item.family || 'Otros';
+    const spirit = getMainSpirit(item);
+    const addAlc = item.ingr.filter(ing => ingrGroup(ing) === 'liqueur');
+    const bitters = item.ingr.filter(ing => ingrGroup(ing) === 'bitter');
+    const otros = item.ingr.filter(ing => !addAlc.includes(ing) && !bitters.includes(ing) && ing !== spirit);
+    const price = item.prices && item.prices.length ? Math.min(...item.prices.map(p=>p.p)) : 0;
+    return { name:item.name, price, section, spirit, spiritBrand:spirit, addAlc, bitters, otros, image:IMAGES[item.name]||null };
+  });
+}
+let interactiveState = { section:'Todos', spirits:[], addAlc:[], bitters:[], otros:[] };
+function interactiveCls(s){ return INTERACTIVE_MENU_META[s]?.cls || 'all'; }
+function interactiveFiltered(){
+  return INTERACTIVE_MENU_DATA.filter(c=>{
+    if(interactiveState.section !== 'Todos' && c.section !== interactiveState.section) return false;
+    if(interactiveState.spirits.length && !interactiveState.spirits.includes(c.spirit)) return false;
+    if(interactiveState.addAlc.length && !interactiveState.addAlc.some(a=>c.addAlc.includes(a))) return false;
+    if(interactiveState.bitters.length && !interactiveState.bitters.some(b=>c.bitters.includes(b))) return false;
+    if(interactiveState.otros.length && !interactiveState.otros.some(o=>c.otros.includes(o))) return false;
+    return true;
+  });
+}
+function toggleList(arr,val){ const i=arr.indexOf(val); if(i===-1) arr.push(val); else arr.splice(i,1); }
+function renderInteractiveMenu(){
+  const source = interactiveState.section === 'Todos' ? INTERACTIVE_MENU_DATA : INTERACTIVE_MENU_DATA.filter(c=>c.section === interactiveState.section);
+  const availSpirits = [...new Set(source.map(c=>c.spirit))].sort();
+  const availAdd = [...new Set(source.flatMap(c=>c.addAlc))].sort();
+  const availBit = [...new Set(source.flatMap(c=>c.bitters))].sort();
+  const availOtr = [...new Set(source.flatMap(c=>c.otros))].sort();
+  const list = interactiveFiltered();
+  const tabsHtml = INTERACTIVE_MENU_SECTIONS.map(s=>`<button class="interactive-tab${interactiveState.section===s?' active':''}" onclick="setInteractiveSection('${s.replace(/'/g, "\\'")}')">${s}</button>`).join('');
+  const renderGroup = (label, values, stateArr, key, showCounts)=>{
+    if(!values.length) return '';
+    const buttons = values.map(v=>{
+      const active = stateArr.includes(v);
+      const count = showCounts ? ` <span class="count">(${source.filter(c=>key==='spirits'?c.spirit===v:(key==='addAlc'?c.addAlc.includes(v):(key==='bitters'?c.bitters.includes(v):c.otros.includes(v)))).length})</span>` : '';
+      return `<button class="interactive-filter-btn${active?' active':''}" onclick="toggleInteractiveFilter('${key}','${escHtml(v).replace(/'/g, "\\'") }')"><span>${active?'✓ ':''}${escHtml(v)}</span>${count}</button>`;
+    }).join('');
+    return `<div class="interactive-filter-section"><div class="interactive-filter-label">${label}</div>${buttons}${stateArr.length?`<button class="interactive-clear" onclick="clearInteractiveFilter('${key}')">limpiar</button>`:''}</div>`;
+  };
+  const filtersHtml = renderGroup('Alcohol principal', availSpirits, interactiveState.spirits, 'spirits', true) + renderGroup('Licores & alcohólicos', availAdd, interactiveState.addAlc, 'addAlc', false) + (availBit.length ? renderGroup('Bitters', availBit, interactiveState.bitters, 'bitters', false) : '') + renderGroup('Otros ingredientes', availOtr, interactiveState.otros, 'otros', false);
+  const cardsHtml = list.length ? list.map(c=>`<div class="interactive-card">
+      <div class="interactive-card-top">
+        <div class="interactive-card-name">${escHtml(c.name)}</div>
+        <div class="interactive-card-price">${fmt(c.price)}</div>
+      </div>
+      <div class="interactive-card-badges">
+        <span class="interactive-badge interactive-badge-section">${escHtml(c.section)}</span>
+        <span class="interactive-badge interactive-badge-spirit">${escHtml(c.spiritBrand)}</span>
+      </div>
+      <div class="interactive-card-desc">${escHtml([...(c.addAlc||[]), ...(c.bitters||[]), ...(c.otros||[])].join(' · '))}</div>
+    </div>`).join('') : '<div class="interactive-empty">Ningún cóctel coincide con los filtros seleccionados.</div>';
+  document.getElementById('area').innerHTML = `<div class="interactive-shell">
+    <div class="interactive-header">
+      <div class="interactive-wordmark">Café Berlín · Interactive Menu</div>
+      <div class="interactive-tabs">${tabsHtml}</div>
+    </div>
+    <div class="interactive-count">${list.length} ${list.length===1?'cóctel':'cócteles'}</div>
+    <div class="interactive-layout">
+      <div class="interactive-filters">${filtersHtml}</div>
+      <div class="interactive-cards">${cardsHtml}</div>
+    </div>
+  </div>`;
+}
+window.setInteractiveSection = function(s){ interactiveState.section=s; interactiveState.spirits=[]; interactiveState.addAlc=[]; interactiveState.bitters=[]; interactiveState.otros=[]; renderInteractiveMenu(); };
+window.toggleInteractiveFilter = function(key,val){ toggleList(interactiveState[key], val); renderInteractiveMenu(); };
+window.clearInteractiveFilter = function(key){ interactiveState[key]=[]; renderInteractiveMenu(); };
+
 const MENU_ONLY = x => x.cat !== "Coctelería clásica";
 function getPool(){
   let pool = activeTab==="Todo" ? RAW.filter(MENU_ONLY) : RAW.filter(x=>x.cat===activeTab);
@@ -818,8 +931,17 @@ function setMode(m){
   appMode = m;
   document.getElementById('btnTest').classList.toggle('active', m==='test');
   document.getElementById('btnLearn').classList.toggle('active', m==='learn');
+  document.getElementById('btnMenu').classList.toggle('active', m==='interactive');
+  const tabsWrap = document.getElementById('tabs').parentElement;
+  const subWrap = document.getElementById('subtabsWrap');
+  tabsWrap.style.display = m==='interactive' ? 'none' : '';
+  subWrap.style.display = m==='interactive' ? 'none' : (activeTab===AUTOR_CAT || activeTab===CLASICA_CAT ? '' : 'none');
   document.getElementById('filters').style.display = m==='test' ? '' : 'none';
   document.getElementById('metaBar').style.display = m==='test' ? '' : 'none';
+  if(m==='interactive'){
+    renderInteractiveMenu();
+    return;
+  }
   buildTabs();
   if(m==='test') startQuiz();
   else startLearn();
@@ -1127,6 +1249,8 @@ const GROUP_LABELS = {
   bitter:"Bitters", sweet:"Endulzantes / Sweeteners", other:"Otros / Other"
 };
 function ingrGroup(name){ return INGR_GROUP[name] || "other"; }
+
+const INTERACTIVE_MENU_DATA = buildInteractiveMenuData();
 
 function priceLabel(item){
   if(!item.prices || !item.prices.length) return '';
