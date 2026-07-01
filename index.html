@@ -594,10 +594,6 @@ const sh   = a=>[...a].sort(()=>Math.random()-.5);
 const pick = (a,n)=>sh(a).slice(0,n);
 const fmt  = p=>`${p.toFixed(2).replace(".",",")} €`;
 
-const INTERACTIVE_MENU_SECTIONS = ['Todos','Acid Times','Sweet Times','Spicy Times','Hard Times'];
-const INTERACTIVE_MENU_META = {
-  Todos:{cls:'all'}, 'Acid Times':{cls:'acid'}, 'Sweet Times':{cls:'sweet'}, 'Spicy Times':{cls:'spicy'}, 'Hard Times':{cls:'hard'}
-};
 const MENU_SPIRIT_HINTS = new Set(['Tequila','Tequila Don Julio','Gin','Gin Tanqueray','Gin Mare','Vodka','Moskovskaya','Vodka Smirnoff Tamarindo','Ron','Ron blanco','Ron jamaicano','Bumbu','Diplomático Planas','Jack Daniels Fire','Jack Daniels Triple Mash','Monkey Shoulder','Whisky','Whiskey','Fino']);
 function escHtml(v){ return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function getMainSpirit(item){
@@ -608,9 +604,16 @@ function getMainSpirit(item){
   const first = item.ingr.find(Boolean);
   return first || 'Otros';
 }
+function getInteractivePool(){
+  const allowedCats = new Set(['Cócteles de autor','Coctelería clásica','Micheladas','Spritz']);
+  let pool = RAW.filter(x => allowedCats.has(x.cat) && x.hasIngr && x.ingr && x.ingr.length);
+  if(activeTab !== 'Todo') pool = pool.filter(x => x.cat === activeTab);
+  if(activeFamily) pool = pool.filter(x => x.family === activeFamily);
+  return pool;
+}
 function buildInteractiveMenuData(){
-  return RAW.filter(x=>x.cat===AUTOR_CAT && x.hasIngr && x.ingr && x.ingr.length).map(item=>{
-    const section = item.family || 'Otros';
+  return getInteractivePool().map(item=>{
+    const section = item.family || item.cat || 'Otros';
     const spirit = getMainSpirit(item);
     const addAlc = item.ingr.filter(ing => ingrGroup(ing) === 'liqueur');
     const bitters = item.ingr.filter(ing => ingrGroup(ing) === 'bitter');
@@ -619,11 +622,9 @@ function buildInteractiveMenuData(){
     return { name:item.name, price, section, spirit, spiritBrand:spirit, addAlc, bitters, otros, image:IMAGES[item.name]||null };
   });
 }
-let interactiveState = { section:'Todos', spirits:[], addAlc:[], bitters:[], otros:[] };
-function interactiveCls(s){ return INTERACTIVE_MENU_META[s]?.cls || 'all'; }
-function interactiveFiltered(){
-  return INTERACTIVE_MENU_DATA.filter(c=>{
-    if(interactiveState.section !== 'Todos' && c.section !== interactiveState.section) return false;
+let interactiveState = { spirits:[], addAlc:[], bitters:[], otros:[] };
+function interactiveFiltered(data){
+  return data.filter(c=>{
     if(interactiveState.spirits.length && !interactiveState.spirits.includes(c.spirit)) return false;
     if(interactiveState.addAlc.length && !interactiveState.addAlc.some(a=>c.addAlc.includes(a))) return false;
     if(interactiveState.bitters.length && !interactiveState.bitters.some(b=>c.bitters.includes(b))) return false;
@@ -633,13 +634,18 @@ function interactiveFiltered(){
 }
 function toggleList(arr,val){ const i=arr.indexOf(val); if(i===-1) arr.push(val); else arr.splice(i,1); }
 function renderInteractiveMenu(){
-  const source = interactiveState.section === 'Todos' ? INTERACTIVE_MENU_DATA : INTERACTIVE_MENU_DATA.filter(c=>c.section === interactiveState.section);
+  const data = buildInteractiveMenuData();
+  const source = data;
   const availSpirits = [...new Set(source.map(c=>c.spirit))].sort();
   const availAdd = [...new Set(source.flatMap(c=>c.addAlc))].sort();
   const availBit = [...new Set(source.flatMap(c=>c.bitters))].sort();
   const availOtr = [...new Set(source.flatMap(c=>c.otros))].sort();
-  const list = interactiveFiltered();
-  const tabsHtml = INTERACTIVE_MENU_SECTIONS.map(s=>`<button class="interactive-tab${interactiveState.section===s?' active':''}" onclick="setInteractiveSection('${s.replace(/'/g, "\\'")}')">${s}</button>`).join('');
+  const list = interactiveFiltered(data);
+  const interactiveCats = ['Todo', 'Cócteles de autor', 'Coctelería clásica', 'Micheladas', 'Spritz'];
+  const tabsHtml = interactiveCats.map(c=>`<button class="interactive-tab${activeTab===c?' active':''}" onclick="setInteractiveTab('${c.replace(/'/g, "\\'")}')">${c}</button>`).join('');
+  const hasSubtabs = activeTab===AUTOR_CAT || activeTab===CLASICA_CAT;
+  const subtabFamilies = activeTab===AUTOR_CAT ? AUTOR_FAMILIES : activeTab===CLASICA_CAT ? CLASICA_FAMILIES : [];
+  const familyTabsHtml = hasSubtabs ? [`<button class="interactive-tab${activeFamily===null?' active':''}" onclick="setInteractiveFamily(null)">Todos</button>`, ...subtabFamilies.map(f=>`<button class="interactive-tab${activeFamily===f?' active':''}" onclick="setInteractiveFamily('${f.replace(/'/g, "\\'")}')">${f}</button>`)].join('') : '';
   const renderGroup = (label, values, stateArr, key, showCounts)=>{
     if(!values.length) return '';
     const buttons = values.map(v=>{
@@ -665,6 +671,7 @@ function renderInteractiveMenu(){
     <div class="interactive-header">
       <div class="interactive-wordmark">Café Berlín · Interactive Menu</div>
       <div class="interactive-tabs">${tabsHtml}</div>
+      ${familyTabsHtml ? `<div class="interactive-tabs" style="margin-top:4px">${familyTabsHtml}</div>` : ''}
     </div>
     <div class="interactive-count">${list.length} ${list.length===1?'cóctel':'cócteles'}</div>
     <div class="interactive-layout">
@@ -673,7 +680,8 @@ function renderInteractiveMenu(){
     </div>
   </div>`;
 }
-window.setInteractiveSection = function(s){ interactiveState.section=s; interactiveState.spirits=[]; interactiveState.addAlc=[]; interactiveState.bitters=[]; interactiveState.otros=[]; renderInteractiveMenu(); };
+window.setInteractiveTab = function(tab){ activeTab=tab; activeFamily=null; interactiveState.spirits=[]; interactiveState.addAlc=[]; interactiveState.bitters=[]; interactiveState.otros=[]; renderInteractiveMenu(); };
+window.setInteractiveFamily = function(f){ activeFamily=f; interactiveState.spirits=[]; interactiveState.addAlc=[]; interactiveState.bitters=[]; interactiveState.otros=[]; renderInteractiveMenu(); };
 window.toggleInteractiveFilter = function(key,val){ toggleList(interactiveState[key], val); renderInteractiveMenu(); };
 window.clearInteractiveFilter = function(key){ interactiveState[key]=[]; renderInteractiveMenu(); };
 
