@@ -578,7 +578,8 @@ const CATS = ["Todo",...[...new Set(RAW.map(x=>x.cat))]];
 const AUTOR_CAT    = "Cócteles de autor";
 const CLASICA_CAT  = "Coctelería clásica";
 const DESTILADOS_TAB = "Destilados";
-const DESTILADOS_SUBGROUPS = ["Tequila","Gin","Vodka","Ron","Whisky","Otros"];
+const DESTILADOS_CATS = ["Ron","Whisky","Gin","Tequila","Vodka"];
+const DESTILADOS_SUBGROUPS = ["Tequila","Gin","Vodka","Ron","Whisky"];
 const CAT_DESCRIPTIONS = {
   "Spritz": "Un spritz es un famoso y refrescante cóctel de origen italiano que se sirve principalmente como aperitivo. Su receta clásica combina tres elementos fundamentales: vino blanco espumoso (generalmente Prosecco), un licor amargo (bitter) y un chorrito de agua con gas (soda). La regla de oro del cóctel italiano clásico sigue la proporción 3-2-1: tres partes de prosecco o cava, 2 partes de bitter y 1 de soda.",
   "Licores": "Un licor es una bebida alcohólica elaborada a partir de un destilado al que se le añaden azúcar y aromas o sabores, como frutas, hierbas, especias, café o frutos secos. Suele tener un sabor dulce e intenso y puede consumirse solo o utilizarse como ingrediente para aportar sabor y color a los cócteles.",
@@ -618,10 +619,14 @@ const fmt  = p=>`${p.toFixed(2).replace(".",",")} €`;
 const MENU_SPIRIT_HINTS = new Set(['Tequila','Tequila Don Julio','Gin','Gin Tanqueray','Gin Mare','Vodka','Moskovskaya','Vodka Smirnoff Tamarindo','Ron','Ron blanco','Ron jamaicano','Bumbu','Diplomático Planas','Jack Daniels Fire','Jack Daniels Triple Mash','Monkey Shoulder','Whisky','Whiskey','Fino']);
 function escHtml(v){ return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function getMainSpirit(item){
+  const cat = String(item?.cat || '').trim();
+  if(DESTILADOS_CATS.includes(cat)) return cat;
+  const ingr = Array.isArray(item?.ingr) ? item.ingr : [];
+  if(!ingr.length) return 'Otros';
   const ordered = ['Tequila','Gin','Vodka','Ron','Whisky','Whiskey','Fino'];
-  for(const known of ordered){ if(item.ingr.includes(known)) return known; }
+  for(const known of ordered){ if(ingr.includes(known)) return known; }
   const excludedSpirits = new Set(['Cerveza','Vino tinto']);
-  const spiritCandidates = item.ingr.filter(ing => {
+  const spiritCandidates = ingr.filter(ing => {
     const group = ingrGroup(ing);
     return group === 'spirit' && !excludedSpirits.has(ing) && (MENU_SPIRIT_HINTS.has(ing) || ordered.includes(ing));
   });
@@ -629,50 +634,54 @@ function getMainSpirit(item){
   return 'Otros';
 }
 function getInteractiveSpiritGroup(item){
-  const spirit = getMainSpirit(item);
-  if(['Tequila','Tequila Don Julio'].includes(spirit)) return 'Tequila';
-  if(['Gin','Gin Tanqueray','Gin Mare'].includes(spirit)) return 'Gin';
-  if(['Vodka','Moskovskaya','Vodka Smirnoff Tamarindo'].includes(spirit)) return 'Vodka';
-  if(['Ron','Ron blanco','Ron jamaicano','Bumbu','Diplomático Planas'].includes(spirit)) return 'Ron';
-  if(['Whisky','Whiskey','Jack Daniels Fire','Jack Daniels Triple Mash','Monkey Shoulder'].includes(spirit)) return 'Whisky';
+  const cat = String(item?.cat || '').trim();
+  if(DESTILADOS_CATS.includes(cat)) return cat;
+  if(['Tequila','Tequila Don Julio'].includes(cat)) return 'Tequila';
+  if(['Gin','Gin Tanqueray','Gin Mare'].includes(cat)) return 'Gin';
+  if(['Vodka','Moskovskaya','Vodka Smirnoff Tamarindo'].includes(cat)) return 'Vodka';
+  if(['Ron','Ron blanco','Ron jamaicano','Bumbu','Diplomático Planas'].includes(cat)) return 'Ron';
+  if(['Whisky','Whiskey','Jack Daniels Fire','Jack Daniels Triple Mash','Monkey Shoulder'].includes(cat)) return 'Whisky';
   return 'Otros';
 }
 function getInteractivePool(includeAll=false){
+  let pool;
+  if(activeTab === DESTILADOS_TAB){
+    pool = RAW.filter(x => DESTILADOS_CATS.includes(x.cat));
+    if(activeFamily) pool = pool.filter(x => x.cat === activeFamily);
+    return pool;
+  }
   const allowedCats = new Set(['Cócteles de autor','Coctelería clásica','Micheladas','Spritz']);
-  let pool = RAW.filter(x => allowedCats.has(x.cat) && x.hasIngr && x.ingr && x.ingr.length);
+  pool = RAW.filter(x => allowedCats.has(x.cat) && x?.hasIngr && Array.isArray(x?.ingr) && x.ingr.length);
   if(!includeAll){
-    if(activeTab === DESTILADOS_TAB){
-      pool = pool.filter(x => getInteractiveSpiritGroup(x) !== 'Otros');
-      if(activeFamily) pool = pool.filter(x => getInteractiveSpiritGroup(x) === activeFamily);
-    } else {
-      if(activeTab !== 'Todo') pool = pool.filter(x => x.cat === activeTab);
-      if(activeFamily) pool = pool.filter(x => x.family === activeFamily);
-    }
+    if(activeTab !== 'Todo') pool = pool.filter(x => x.cat === activeTab);
+    if(activeFamily) pool = pool.filter(x => x.family === activeFamily);
   }
   return pool;
 }
 function buildInteractiveMenuData(pool = getInteractivePool()){
   return pool.map(item=>{
-    const section = item.family || item.cat || 'Otros';
-    const spirit = getMainSpirit(item);
+    const ingr = Array.isArray(item?.ingr) ? item.ingr : [];
+    const section = item?.family || item?.cat || 'Otros';
+    const spiritGroup = getInteractiveSpiritGroup(item);
+    const spirit = spiritGroup === 'Otros' ? getMainSpirit(item) : spiritGroup;
     const excludedSpirits = new Set(['Cerveza','Vino tinto','Vermut','Vermut tinto','Cava']);
-    const spirits = item.ingr.filter(ing => {
+    const spirits = ingr.filter(ing => {
       const group = ingrGroup(ing);
       return group === 'spirit' && !excludedSpirits.has(ing);
     });
-    const licores = item.ingr.filter(ing => ingrGroup(ing) === 'liqueur');
-    const cervezas = item.ingr.filter(ing => ingrGroup(ing) === 'beer');
-    const vinosVermuts = item.ingr.filter(ing => ingrGroup(ing) === 'wine');
-    const bitters = item.ingr.filter(ing => ingrGroup(ing) === 'bitter');
-    const zumosRefrescos = item.ingr.filter(ing => {
+    const licores = ingr.filter(ing => ingrGroup(ing) === 'liqueur');
+    const cervezas = ingr.filter(ing => ingrGroup(ing) === 'beer');
+    const vinosVermuts = ingr.filter(ing => ingrGroup(ing) === 'wine');
+    const bitters = ingr.filter(ing => ingrGroup(ing) === 'bitter');
+    const zumosRefrescos = ingr.filter(ing => {
       const group = ingrGroup(ing);
       return group === 'juice' || group === 'filler';
     });
-    const frutas = item.ingr.filter(ing => ingrGroup(ing) === 'fruit');
-    const siropes = item.ingr.filter(ing => ingrGroup(ing) === 'sweet');
-    const otros = item.ingr.filter(ing => !spirits.includes(ing) && !licores.includes(ing) && !cervezas.includes(ing) && !vinosVermuts.includes(ing) && !bitters.includes(ing) && !zumosRefrescos.includes(ing) && !frutas.includes(ing) && !siropes.includes(ing));
-    const price = item.prices && item.prices.length ? Math.min(...item.prices.map(p=>p.p)) : 0;
-    return { name:item.name, price, section, spirit, spiritBrand:spirit, spirits, licores, cervezas, vinosVermuts, bitters, zumosRefrescos, frutas, siropes, otros, image:IMAGES[item.name]||null };
+    const frutas = ingr.filter(ing => ingrGroup(ing) === 'fruit');
+    const siropes = ingr.filter(ing => ingrGroup(ing) === 'sweet');
+    const otros = ingr.filter(ing => !spirits.includes(ing) && !licores.includes(ing) && !cervezas.includes(ing) && !vinosVermuts.includes(ing) && !bitters.includes(ing) && !zumosRefrescos.includes(ing) && !frutas.includes(ing) && !siropes.includes(ing));
+    const price = item?.prices && item.prices.length ? Math.min(...item.prices.map(p=>p.p)) : 0;
+    return { name:item?.name, price, section, spirit, spiritBrand:spirit, spirits, licores, cervezas, vinosVermuts, bitters, zumosRefrescos, frutas, siropes, otros, image:IMAGES[item?.name]||null };
   });
 }
 let interactiveState = { spirits:[], licores:[], cervezas:[], vinosVermuts:[], bitters:[], zumosRefrescos:[], frutas:[], siropes:[], otros:[] };
@@ -769,8 +778,8 @@ function getPool(){
   if(activeTab==="Todo"){
     pool = RAW.filter(MENU_ONLY);
   } else if(activeTab===DESTILADOS_TAB){
-    pool = RAW.filter(x => MENU_ONLY(x) && getInteractiveSpiritGroup(x) !== 'Otros');
-    if(activeFamily) pool = pool.filter(x => getInteractiveSpiritGroup(x) === activeFamily);
+    pool = RAW.filter(x => DESTILADOS_CATS.includes(x.cat));
+    if(activeFamily) pool = pool.filter(x => x.cat === activeFamily);
     return pool;
   } else {
     pool = RAW.filter(x=>x.cat===activeTab);
