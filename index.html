@@ -153,23 +153,27 @@ const RAW = [
    ingr:["Hierbabuena","Ron blanco","Zumo de lima","Azúcar líquido","Soda"],
    doses:{"Ron blanco":"1 oz","Zumo de lima":"1 oz","Azúcar líquido":"1 oz"},
    method:"Removido",
-   glass:"Collins (tubo)"},
+   glass:"Collins (tubo)",
+   prices:[{label:"cóctel",p:11}]},
   {cat:"Coctelería clásica",name:"Whiskey Highball",family:"Highball",hasIngr:true,
    ingr:["Whisky","Soda", "Bitter"],
    optional:["Bitter"],
    doses:{"Whisky":"2 oz","Soda":"top"},
    method:"Removido",
-   glass:"Vaso largo"},
+   glass:"Vaso largo",
+   prices:[{label:"cóctel",p:11}]},
   {cat:"Coctelería clásica",name:"Screwdriver (Destornillador)",family:"Highball",hasIngr:true,
    ingr:["Vodka","Zumo de naranja"],
    doses:{"Vodka":"2 oz","Zumo de naranja":"top"},
    method:"Removido",
-   glass:"Vaso largo"},
+   glass:"Vaso largo",
+   prices:[{label:"cóctel",p:11}]},
   {cat:"Coctelería clásica",name:"Harvey Wallbanger (Rompetechos)",family:"Highball",hasIngr:true,
    ingr:["Vodka","Licor Galliano","Zumo de naranja"],
    doses:{"Vodka":"1 oz","Licor Galliano":"0.5 oz","Zumo de naranja":"top"},
    method:"Removido",
-   glass:"Vaso largo"},
+   glass:"Vaso largo",
+   prices:[{label:"cóctel",p:11}]},
   {cat:"Cócteles de autor",family:"Acid Times",name:"Blue Margarita",hasIngr:true,ingr:["Tequila","Licor Bols Blue Curaçao","Sirope de agave","Zumo de lima"],
    prices:[{label:"cóctel",p:12}]},
   {cat:"Cócteles de autor",family:"Acid Times",name:"Brote Primera",hasIngr:true,ingr:["Gin Tanqueray","Licor yuzu","Azúcar líquido","Lima","Albahaca"],
@@ -243,7 +247,7 @@ const RAW = [
   {cat:"Ron",name:"Zacapa Centenario 23",hasIngr:false,
    prices:[{label:"combinado",p:16},{label:"chupito",p:8}]},
   {cat:"Whisky",name:"Johnnie Walker Red Label",hasIngr:false,
-   prices:[{label:"combinado",p:9},{label:"doble",p:12},{label:"chupito",p:3}]},
+   prices:[{label:"combinado",p:9.5},{label:"doble",p:12},{label:"chupito",p:3}]},
   {cat:"Whisky",name:"Johnnie Walker Black Label 12Y",hasIngr:false,
    prices:[{label:"combinado",p:12},{label:"doble",p:16},{label:"chupito",p:6}]},
   {cat:"Whisky",name:"Tullamore Dew",hasIngr:false,
@@ -377,7 +381,7 @@ const RAW = [
   {cat:"Refrescos",name:"Red Bull",hasIngr:false,
    prices:[{label:"lata",p:3.5}]},
   {cat:"Refrescos",name:"Agua Lanjarón",hasIngr:false,
-   prices:[{label:"botella",p:3}]},
+   prices:[{label:"botella",p:2.5}]},
   {cat:"Refrescos",name:"Agua con gas Perrier",hasIngr:false,
    prices:[{label:"botella",p:3}]},
 ];
@@ -776,7 +780,7 @@ function makeQs(){
 
   // --- Price questions: one per serving format ---
   if(activeFilters.has("price")){
-    pool.filter(item=>item.prices && item.prices.length).forEach(item=>{
+    pool.filter(item=>item.prices && item.prices.length && item.cat!==CLASICA_CAT).forEach(item=>{
       item.prices.forEach(serving=>{
         // Wrong options: other prices from the whole menu, excluding the correct value
         const wrongPs=sh(UNIQUE_PRICES.filter(p=>p!==serving.p)).slice(0,3);
@@ -1196,7 +1200,7 @@ function genQuizQueue(item){
     const iq = genIngrQ(item);
     if(iq) qs.push(iq);
   }
-  const pq = genPriceQ(item);
+  const pq = item.cat !== CLASICA_CAT ? genPriceQ(item) : null;
   if(pq) qs.push(pq);
   return qs;
 }
