@@ -577,6 +577,8 @@ const UNIQUE_PRICES = [...new Set(ALL_PRICES_FLAT)];
 const CATS = ["Todo",...[...new Set(RAW.map(x=>x.cat))]];
 const AUTOR_CAT    = "Cócteles de autor";
 const CLASICA_CAT  = "Coctelería clásica";
+const DESTILADOS_TAB = "Destilados";
+const DESTILADOS_SUBGROUPS = ["Tequila","Gin","Vodka","Ron","Whisky","Otros"];
 const CAT_DESCRIPTIONS = {
   "Spritz": "Un spritz es un famoso y refrescante cóctel de origen italiano que se sirve principalmente como aperitivo. Su receta clásica combina tres elementos fundamentales: vino blanco espumoso (generalmente Prosecco), un licor amargo (bitter) y un chorrito de agua con gas (soda). La regla de oro del cóctel italiano clásico sigue la proporción 3-2-1: tres partes de prosecco o cava, 2 partes de bitter y 1 de soda.",
   "Licores": "Un licor es una bebida alcohólica elaborada a partir de un destilado al que se le añaden azúcar y aromas o sabores, como frutas, hierbas, especias, café o frutos secos. Suele tener un sabor dulce e intenso y puede consumirse solo o utilizarse como ingrediente para aportar sabor y color a los cócteles.",
@@ -626,12 +628,26 @@ function getMainSpirit(item){
   if(spiritCandidates.length) return spiritCandidates[0];
   return 'Otros';
 }
+function getInteractiveSpiritGroup(item){
+  const spirit = getMainSpirit(item);
+  if(['Tequila','Tequila Don Julio'].includes(spirit)) return 'Tequila';
+  if(['Gin','Gin Tanqueray','Gin Mare'].includes(spirit)) return 'Gin';
+  if(['Vodka','Moskovskaya','Vodka Smirnoff Tamarindo'].includes(spirit)) return 'Vodka';
+  if(['Ron','Ron blanco','Ron jamaicano','Bumbu','Diplomático Planas'].includes(spirit)) return 'Ron';
+  if(['Whisky','Whiskey','Jack Daniels Fire','Jack Daniels Triple Mash','Monkey Shoulder'].includes(spirit)) return 'Whisky';
+  return 'Otros';
+}
 function getInteractivePool(includeAll=false){
   const allowedCats = new Set(['Cócteles de autor','Coctelería clásica','Micheladas','Spritz']);
   let pool = RAW.filter(x => allowedCats.has(x.cat) && x.hasIngr && x.ingr && x.ingr.length);
   if(!includeAll){
-    if(activeTab !== 'Todo') pool = pool.filter(x => x.cat === activeTab);
-    if(activeFamily) pool = pool.filter(x => x.family === activeFamily);
+    if(activeTab === DESTILADOS_TAB){
+      pool = pool.filter(x => getInteractiveSpiritGroup(x) !== 'Otros');
+      if(activeFamily) pool = pool.filter(x => getInteractiveSpiritGroup(x) === activeFamily);
+    } else {
+      if(activeTab !== 'Todo') pool = pool.filter(x => x.cat === activeTab);
+      if(activeFamily) pool = pool.filter(x => x.family === activeFamily);
+    }
   }
   return pool;
 }
@@ -689,10 +705,10 @@ function renderInteractiveMenu(){
   const availSiropes = [...new Set(source.flatMap(c=>c.siropes))].sort();
   const availOtr = [...new Set(source.flatMap(c=>c.otros))].sort();
   const list = interactiveFiltered(data);
-  const interactiveCats = ['Todo', 'Cócteles de autor', 'Coctelería clásica', 'Micheladas', 'Spritz'];
+  const interactiveCats = ['Todo', DESTILADOS_TAB, 'Cócteles de autor', 'Coctelería clásica', 'Micheladas', 'Spritz'];
   const tabsHtml = interactiveCats.map(c=>`<button class="interactive-tab${activeTab===c?' active':''}" onclick="setInteractiveTab('${c.replace(/'/g, "\\'")}')">${c}</button>`).join('');
-  const hasSubtabs = activeTab===AUTOR_CAT || activeTab===CLASICA_CAT;
-  const subtabFamilies = activeTab===AUTOR_CAT ? AUTOR_FAMILIES : activeTab===CLASICA_CAT ? CLASICA_FAMILIES : [];
+  const hasSubtabs = activeTab===AUTOR_CAT || activeTab===CLASICA_CAT || activeTab===DESTILADOS_TAB;
+  const subtabFamilies = activeTab===DESTILADOS_TAB ? DESTILADOS_SUBGROUPS : activeTab===AUTOR_CAT ? AUTOR_FAMILIES : activeTab===CLASICA_CAT ? CLASICA_FAMILIES : [];
   const familyTabsHtml = hasSubtabs ? [`<button class="interactive-tab${activeFamily===null?' active':''}" onclick="setInteractiveFamily(null)">Todos</button>`, ...subtabFamilies.map(f=>`<button class="interactive-tab${activeFamily===f?' active':''}" onclick="setInteractiveFamily('${f.replace(/'/g, "\\'")}')">${f}</button>`)].join('') : '';
   const renderGroup = (label, values, stateArr, key, showCounts)=>{
     if(!values.length) return '';
@@ -749,7 +765,16 @@ window.toggleInteractiveAccordion = function(key){
 
 const MENU_ONLY = x => x.cat !== "Coctelería clásica";
 function getPool(){
-  let pool = activeTab==="Todo" ? RAW.filter(MENU_ONLY) : RAW.filter(x=>x.cat===activeTab);
+  let pool;
+  if(activeTab==="Todo"){
+    pool = RAW.filter(MENU_ONLY);
+  } else if(activeTab===DESTILADOS_TAB){
+    pool = RAW.filter(x => MENU_ONLY(x) && getInteractiveSpiritGroup(x) !== 'Otros');
+    if(activeFamily) pool = pool.filter(x => getInteractiveSpiritGroup(x) === activeFamily);
+    return pool;
+  } else {
+    pool = RAW.filter(x=>x.cat===activeTab);
+  }
   if(activeFamily) pool = pool.filter(x=>x.family===activeFamily);
   return pool;
 }
@@ -892,11 +917,20 @@ function updateMeta(){
   document.getElementById("prog").style.width=questions.length?`${cur/questions.length*100}%`:"0%";
 }
 function buildTabs(){
-  document.getElementById("tabs").innerHTML=CATS.map(c=>
+  const tabList = [
+    'Todo',
+    CLASICA_CAT,
+    AUTOR_CAT,
+    'Spritz',
+    'Sin Alcohol',
+    DESTILADOS_TAB,
+    ...CATS.filter(c=>!['Todo',CLASICA_CAT,AUTOR_CAT,'Spritz','Sin Alcohol',DESTILADOS_TAB,'Ron','Whisky','Gin','Tequila','Vodka'].includes(c))
+  ];
+  document.getElementById("tabs").innerHTML=tabList.map(c=>
     `<button class="tab${c===activeTab?" active":""}" onclick="setTab('${c.replace(/'/g,"\\'")}')">${c}</button>`
   ).join("");
-  const hasSubtabs = activeTab===AUTOR_CAT || activeTab===CLASICA_CAT;
-  const subtabFamilies = activeTab===AUTOR_CAT ? AUTOR_FAMILIES : activeTab===CLASICA_CAT ? CLASICA_FAMILIES : [];
+  const hasSubtabs = activeTab===AUTOR_CAT || activeTab===CLASICA_CAT || activeTab===DESTILADOS_TAB;
+  const subtabFamilies = activeTab===DESTILADOS_TAB ? DESTILADOS_SUBGROUPS : activeTab===AUTOR_CAT ? AUTOR_FAMILIES : activeTab===CLASICA_CAT ? CLASICA_FAMILIES : [];
   document.getElementById("subtabsWrap").style.display = hasSubtabs ? '' : 'none';
   if(hasSubtabs){
     document.getElementById("subtabs").innerHTML=
@@ -1005,7 +1039,7 @@ function setMode(m){
   const tabsWrap = document.getElementById('tabs').parentElement;
   const subWrap = document.getElementById('subtabsWrap');
   tabsWrap.style.display = m==='interactive' ? 'none' : '';
-  subWrap.style.display = m==='interactive' ? 'none' : (activeTab===AUTOR_CAT || activeTab===CLASICA_CAT ? '' : 'none');
+  subWrap.style.display = m==='interactive' ? 'none' : (activeTab===AUTOR_CAT || activeTab===CLASICA_CAT || activeTab===DESTILADOS_TAB ? '' : 'none');
   document.getElementById('filters').style.display = m==='test' ? '' : 'none';
   document.getElementById('metaBar').style.display = m==='test' ? '' : 'none';
   if(m==='interactive'){
@@ -1025,10 +1059,7 @@ let recallSelected = new Set();
 let recallStats = {hits:0, total:0, perfect:0, items:0};
 
 function getLearnPool(){
-  const cats = activeTab==='Todo' ? null : activeTab;
-  let pool = RAW.filter(x=> (!cats || x.cat===cats) && (cats || MENU_ONLY(x)));
-  if(activeFamily) pool = pool.filter(x=>x.family===activeFamily);
-  return pool;
+  return getPool();
 }
 
 function startLearn(){
