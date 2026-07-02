@@ -1200,6 +1200,19 @@ function genPriceQ(item){
     hint:`${item.name} — ${hint_parts}`};
 }
 
+function genRatioQ(item){
+  if(!item.doses || Object.keys(item.doses).length===0) return null;
+  const allWithDoses = RAW.filter(x=>x.doses && Object.keys(x.doses).length>0);
+  function ratioStr(x){ return x.ingr.map(i=>(x.doses&&x.doses[i])?`${x.doses[i]} ${i}`:i).join(', '); }
+  const correct = ratioStr(item);
+  const wrongs = sh(allWithDoses.filter(x=>x.name!==item.name)).slice(0,3).map(ratioStr);
+  if(wrongs.length<1) return null;
+  return {qtype:'ratio',
+    q:`¿Cuál es el ratio del ${item.name}?`,
+    opts:sh([correct,...wrongs.slice(0,3)]), answer:correct,
+    hint:`${item.name}: ${correct}`};
+}
+
 function genQuizQueue(item){
   // Always include a price question; include an ingredient question if the item has a recipe.
   const qs = [];
@@ -1208,6 +1221,8 @@ function genQuizQueue(item){
     const iq = genIngrQ(item);
     if(iq) qs.push(iq);
   }
+  const rq = genRatioQ(item);
+  if(rq) qs.push(rq);
   const pq = item.cat !== CLASICA_CAT ? genPriceQ(item) : null;
   if(pq) qs.push(pq);
   return qs;
