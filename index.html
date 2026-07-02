@@ -102,7 +102,9 @@ h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#e8e6e1}
 .interactive-layout{display:grid;grid-template-columns:220px 1fr;min-height:520px}
 .interactive-filters{border-right:1px solid rgba(232,230,225,0.1);padding:16px 14px}
 .interactive-filter-section{margin-bottom:16px}
-.interactive-filter-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#E0AE6B;margin-bottom:8px;font-weight:600}
+.interactive-filter-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;padding:6px 0;border:none;background:none;color:#E0AE6B;font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;text-align:left;font-weight:600}
+.interactive-filter-body{display:none;margin-top:6px}
+.interactive-filter-section.open .interactive-filter-body{display:block}
 .interactive-filter-btn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:6px 8px;margin-bottom:4px;border-radius:8px;border:none;background:transparent;color:#b2aea8;font-size:13px;cursor:pointer}
 .interactive-filter-btn:hover{background:#232220;color:#e8e6e1}
 .interactive-filter-btn.active{background:rgba(224,174,107,0.14);color:#E0AE6B}
@@ -587,7 +589,7 @@ const Q_META = {
   name:         "Nombre",
 };
 
-let activeTab="Coctelería clásica", activeFilters=new Set(FILTER_TYPES);
+let activeTab="Todo", activeFilters=new Set(FILTER_TYPES);
 let questions=[], cur=0, score=0, answered=false;
 
 const sh   = a=>[...a].sort(()=>Math.random()-.5);
@@ -597,48 +599,77 @@ const fmt  = p=>`${p.toFixed(2).replace(".",",")} €`;
 const MENU_SPIRIT_HINTS = new Set(['Tequila','Tequila Don Julio','Gin','Gin Tanqueray','Gin Mare','Vodka','Moskovskaya','Vodka Smirnoff Tamarindo','Ron','Ron blanco','Ron jamaicano','Bumbu','Diplomático Planas','Jack Daniels Fire','Jack Daniels Triple Mash','Monkey Shoulder','Whisky','Whiskey','Fino']);
 function escHtml(v){ return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function getMainSpirit(item){
-  const ordered = ['Tequila','Gin','Vodka','Ron','Whisky','Whiskey'];
+  const ordered = ['Tequila','Gin','Vodka','Ron','Whisky','Whiskey','Fino'];
   for(const known of ordered){ if(item.ingr.includes(known)) return known; }
-  const spiritCandidates = item.ingr.filter(ing => MENU_SPIRIT_HINTS.has(ing));
+  const excludedSpirits = new Set(['Cerveza','Vino tinto']);
+  const spiritCandidates = item.ingr.filter(ing => {
+    const group = ingrGroup(ing);
+    return group === 'spirit' && !excludedSpirits.has(ing) && (MENU_SPIRIT_HINTS.has(ing) || ordered.includes(ing));
+  });
   if(spiritCandidates.length) return spiritCandidates[0];
-  const first = item.ingr.find(Boolean);
-  return first || 'Otros';
+  return 'Otros';
 }
-function getInteractivePool(){
+function getInteractivePool(includeAll=false){
   const allowedCats = new Set(['Cócteles de autor','Coctelería clásica','Micheladas','Spritz']);
   let pool = RAW.filter(x => allowedCats.has(x.cat) && x.hasIngr && x.ingr && x.ingr.length);
-  if(activeTab !== 'Todo') pool = pool.filter(x => x.cat === activeTab);
-  if(activeFamily) pool = pool.filter(x => x.family === activeFamily);
+  if(!includeAll){
+    if(activeTab !== 'Todo') pool = pool.filter(x => x.cat === activeTab);
+    if(activeFamily) pool = pool.filter(x => x.family === activeFamily);
+  }
   return pool;
 }
-function buildInteractiveMenuData(){
-  return getInteractivePool().map(item=>{
+function buildInteractiveMenuData(pool = getInteractivePool()){
+  return pool.map(item=>{
     const section = item.family || item.cat || 'Otros';
     const spirit = getMainSpirit(item);
-    const addAlc = item.ingr.filter(ing => ingrGroup(ing) === 'liqueur');
+    const excludedSpirits = new Set(['Cerveza','Vino tinto','Vermut','Vermut tinto','Cava']);
+    const spirits = item.ingr.filter(ing => {
+      const group = ingrGroup(ing);
+      return group === 'spirit' && !excludedSpirits.has(ing);
+    });
+    const licores = item.ingr.filter(ing => ingrGroup(ing) === 'liqueur');
+    const cervezas = item.ingr.filter(ing => ingrGroup(ing) === 'beer');
+    const vinosVermuts = item.ingr.filter(ing => ingrGroup(ing) === 'wine');
     const bitters = item.ingr.filter(ing => ingrGroup(ing) === 'bitter');
-    const otros = item.ingr.filter(ing => !addAlc.includes(ing) && !bitters.includes(ing) && ing !== spirit);
+    const zumosRefrescos = item.ingr.filter(ing => {
+      const group = ingrGroup(ing);
+      return group === 'juice' || group === 'filler';
+    });
+    const frutas = item.ingr.filter(ing => ingrGroup(ing) === 'fruit');
+    const siropes = item.ingr.filter(ing => ingrGroup(ing) === 'sweet');
+    const otros = item.ingr.filter(ing => !spirits.includes(ing) && !licores.includes(ing) && !cervezas.includes(ing) && !vinosVermuts.includes(ing) && !bitters.includes(ing) && !zumosRefrescos.includes(ing) && !frutas.includes(ing) && !siropes.includes(ing));
     const price = item.prices && item.prices.length ? Math.min(...item.prices.map(p=>p.p)) : 0;
-    return { name:item.name, price, section, spirit, spiritBrand:spirit, addAlc, bitters, otros, image:IMAGES[item.name]||null };
+    return { name:item.name, price, section, spirit, spiritBrand:spirit, spirits, licores, cervezas, vinosVermuts, bitters, zumosRefrescos, frutas, siropes, otros, image:IMAGES[item.name]||null };
   });
 }
-let interactiveState = { spirits:[], addAlc:[], bitters:[], otros:[] };
+let interactiveState = { spirits:[], licores:[], cervezas:[], vinosVermuts:[], bitters:[], zumosRefrescos:[], frutas:[], siropes:[], otros:[] };
+let interactiveAccordionState = { spirits:true, licores:false, cervezas:false, vinosVermuts:false, bitters:false, zumosRefrescos:false, frutas:false, siropes:false, otros:false };
 function interactiveFiltered(data){
   return data.filter(c=>{
-    if(interactiveState.spirits.length && !interactiveState.spirits.includes(c.spirit)) return false;
-    if(interactiveState.addAlc.length && !interactiveState.addAlc.some(a=>c.addAlc.includes(a))) return false;
+    if(interactiveState.spirits.length && !interactiveState.spirits.some(s=>c.spirits.includes(s))) return false;
+    if(interactiveState.licores.length && !interactiveState.licores.some(a=>c.licores.includes(a))) return false;
+    if(interactiveState.cervezas.length && !interactiveState.cervezas.some(a=>c.cervezas.includes(a))) return false;
+    if(interactiveState.vinosVermuts.length && !interactiveState.vinosVermuts.some(a=>c.vinosVermuts.includes(a))) return false;
     if(interactiveState.bitters.length && !interactiveState.bitters.some(b=>c.bitters.includes(b))) return false;
+    if(interactiveState.zumosRefrescos.length && !interactiveState.zumosRefrescos.some(z=>c.zumosRefrescos.includes(z))) return false;
+    if(interactiveState.frutas.length && !interactiveState.frutas.some(f=>c.frutas.includes(f))) return false;
+    if(interactiveState.siropes.length && !interactiveState.siropes.some(s=>c.siropes.includes(s))) return false;
     if(interactiveState.otros.length && !interactiveState.otros.some(o=>c.otros.includes(o))) return false;
     return true;
   });
 }
 function toggleList(arr,val){ const i=arr.indexOf(val); if(i===-1) arr.push(val); else arr.splice(i,1); }
 function renderInteractiveMenu(){
-  const data = buildInteractiveMenuData();
-  const source = data;
-  const availSpirits = [...new Set(source.map(c=>c.spirit))].sort();
-  const availAdd = [...new Set(source.flatMap(c=>c.addAlc))].sort();
+  const data = buildInteractiveMenuData(getInteractivePool());
+  const source = buildInteractiveMenuData(getInteractivePool(true));
+  const availSpirits = [...new Set(source.flatMap(c=>c.spirits))].sort();
+  const availLicores = [...new Set(source.flatMap(c=>c.licores))].sort();
+  const availCervezas = [...new Set(source.flatMap(c=>c.cervezas))].sort();
+  const availVinos = [...new Set(source.flatMap(c=>c.vinosVermuts))].sort();
   const availBit = [...new Set(source.flatMap(c=>c.bitters))].sort();
+  const availZumosRefrescos = [...new Set(source.flatMap(c=>c.zumosRefrescos))].sort();
+  const availFrutas = [...new Set(source.flatMap(c=>c.frutas))].sort();
+  const availSiropes = [...new Set(source.flatMap(c=>c.siropes))].sort();
   const availOtr = [...new Set(source.flatMap(c=>c.otros))].sort();
   const list = interactiveFiltered(data);
   const interactiveCats = ['Todo', 'Cócteles de autor', 'Coctelería clásica', 'Micheladas', 'Spritz'];
@@ -650,12 +681,20 @@ function renderInteractiveMenu(){
     if(!values.length) return '';
     const buttons = values.map(v=>{
       const active = stateArr.includes(v);
-      const count = showCounts ? ` <span class="count">(${source.filter(c=>key==='spirits'?c.spirit===v:(key==='addAlc'?c.addAlc.includes(v):(key==='bitters'?c.bitters.includes(v):c.otros.includes(v)))).length})</span>` : '';
+      const count = showCounts ? ` <span class="count">(${source.filter(c=>key==='spirits'?c.spirits.includes(v):(key==='licores'?c.licores.includes(v):(key==='cervezas'?c.cervezas.includes(v):(key==='vinosVermuts'?c.vinosVermuts.includes(v):(key==='bitters'?c.bitters.includes(v):(key==='zumosRefrescos'?c.zumosRefrescos.includes(v):(key==='frutas'?c.frutas.includes(v):(key==='siropes'?c.siropes.includes(v):c.otros.includes(v))))))))).length})</span>` : '';
       return `<button class="interactive-filter-btn${active?' active':''}" onclick="toggleInteractiveFilter('${key}','${escHtml(v).replace(/'/g, "\\'") }')"><span>${active?'✓ ':''}${escHtml(v)}</span>${count}</button>`;
     }).join('');
-    return `<div class="interactive-filter-section"><div class="interactive-filter-label">${label}</div>${buttons}${stateArr.length?`<button class="interactive-clear" onclick="clearInteractiveFilter('${key}')">limpiar</button>`:''}</div>`;
+    const isOpen = interactiveAccordionState[key] ?? (stateArr.length > 0 || key === 'spirits');
+    return `<div class="interactive-filter-section${isOpen?' open':''}" data-key="${key}">
+      <button class="interactive-filter-toggle" onclick="toggleInteractiveAccordion('${key}')">
+        <span>${label}</span>
+        <span>${isOpen ? '−' : '+'}</span>
+      </button>
+      <div class="interactive-filter-body">${buttons}${stateArr.length?`<button class="interactive-clear" onclick="clearInteractiveFilter('${key}')">limpiar</button>`:''}
+      </div>
+    </div>`;
   };
-  const filtersHtml = renderGroup('Alcohol principal', availSpirits, interactiveState.spirits, 'spirits', true) + renderGroup('Licores & alcohólicos', availAdd, interactiveState.addAlc, 'addAlc', false) + (availBit.length ? renderGroup('Bitters', availBit, interactiveState.bitters, 'bitters', false) : '') + renderGroup('Otros ingredientes', availOtr, interactiveState.otros, 'otros', false);
+  const filtersHtml = renderGroup('Destilados', availSpirits, interactiveState.spirits, 'spirits', true) + renderGroup('Licores', availLicores, interactiveState.licores, 'licores', false) + renderGroup('Cervezas', availCervezas, interactiveState.cervezas, 'cervezas', false) + renderGroup('Vino & Vermuts', availVinos, interactiveState.vinosVermuts, 'vinosVermuts', false) + (availBit.length ? renderGroup('Bitters', availBit, interactiveState.bitters, 'bitters', false) : '') + renderGroup('Zumos & refrescos', availZumosRefrescos, interactiveState.zumosRefrescos, 'zumosRefrescos', false) + renderGroup('Frutas', availFrutas, interactiveState.frutas, 'frutas', false) + renderGroup('Sirope', availSiropes, interactiveState.siropes, 'siropes', false) + renderGroup('Otros ingredientes', availOtr, interactiveState.otros, 'otros', false);
   const cardsHtml = list.length ? list.map(c=>`<div class="interactive-card">
       <div class="interactive-card-top">
         <div class="interactive-card-name">${escHtml(c.name)}</div>
@@ -665,7 +704,7 @@ function renderInteractiveMenu(){
         <span class="interactive-badge interactive-badge-section">${escHtml(c.section)}</span>
         <span class="interactive-badge interactive-badge-spirit">${escHtml(c.spiritBrand)}</span>
       </div>
-      <div class="interactive-card-desc">${escHtml([...(c.addAlc||[]), ...(c.bitters||[]), ...(c.otros||[])].join(' · '))}</div>
+      <div class="interactive-card-desc">${escHtml([...(c.licores||[]), ...(c.cervezas||[]), ...(c.vinosVermuts||[]), ...(c.bitters||[]), ...(c.zumosRefrescos||[]), ...(c.frutas||[]), ...(c.siropes||[]), ...(c.otros||[])].join(' · '))}</div>
     </div>`).join('') : '<div class="interactive-empty">Ningún cóctel coincide con los filtros seleccionados.</div>';
   document.getElementById('area').innerHTML = `<div class="interactive-shell">
     <div class="interactive-header">
@@ -680,10 +719,16 @@ function renderInteractiveMenu(){
     </div>
   </div>`;
 }
-window.setInteractiveTab = function(tab){ activeTab=tab; activeFamily=null; interactiveState.spirits=[]; interactiveState.addAlc=[]; interactiveState.bitters=[]; interactiveState.otros=[]; renderInteractiveMenu(); };
-window.setInteractiveFamily = function(f){ activeFamily=f; interactiveState.spirits=[]; interactiveState.addAlc=[]; interactiveState.bitters=[]; interactiveState.otros=[]; renderInteractiveMenu(); };
+window.setInteractiveTab = function(tab){ activeTab=tab; activeFamily=null; interactiveState={ spirits:[], licores:[], cervezas:[], vinosVermuts:[], bitters:[], zumosRefrescos:[], frutas:[], siropes:[], otros:[] }; renderInteractiveMenu(); };
+window.setInteractiveFamily = function(f){ activeFamily=f; interactiveState={ spirits:[], licores:[], cervezas:[], vinosVermuts:[], bitters:[], zumosRefrescos:[], frutas:[], siropes:[], otros:[] }; renderInteractiveMenu(); };
 window.toggleInteractiveFilter = function(key,val){ toggleList(interactiveState[key], val); renderInteractiveMenu(); };
 window.clearInteractiveFilter = function(key){ interactiveState[key]=[]; renderInteractiveMenu(); };
+window.toggleInteractiveAccordion = function(key){
+  const section = document.querySelector(`.interactive-filter-section[data-key="${key}"]`);
+  if(!section) return;
+  interactiveAccordionState[key] = !section.classList.contains('open');
+  section.classList.toggle('open');
+};
 
 const MENU_ONLY = x => x.cat !== "Coctelería clásica";
 function getPool(){
@@ -1229,11 +1274,13 @@ const INGR_GROUP = {
   "Jack Daniels Fire":"spirit","Jack Daniels Triple Mash":"spirit","Monkey Shoulder":"spirit",
   "Whisky":"spirit","Whiskey":"spirit","Fino":"spirit","Cerveza":"spirit","Vino tinto":"spirit","Tanqueray 0.0":"spirit",
   "Triple Sec Bols":"liqueur","Licor Bols Blue Curaçao":"liqueur","Licor yuzu":"liqueur",
+  "Cerveza":"beer","Guinness":"beer","Paulaner":"beer","Águila":"beer","Heineken":"beer",
   "Licor Midori":"liqueur","Licor de café Bols":"liqueur",
   "Licor de humo":"liqueur","Licor Bols Vainilla":"liqueur","Licor mandarina MB":"liqueur",
   "Licor Bols Chocolate":"liqueur","Licor Bols Butterscotch":"liqueur","Licor Bols Yogurt":"liqueur",
   "Chambord":"liqueur","Bénédictine DOM":"liqueur","Vermut":"liqueur","Vermut tinto":"liqueur",
   "Aperol":"liqueur","Campari":"liqueur","Sarti Rosa":"liqueur","Bols Saúco":"liqueur","Terry":"liqueur",
+  "Vino tinto":"wine","Vermut":"wine","Vermut tinto":"wine","Cava":"wine",
   "7UP":"filler","Cava":"filler","Soda":"filler","Soda de pomelo":"filler","Ginger Ale":"filler",
   "Ginger beer":"filler","Schweppes limón":"filler","Zumo de tomate":"filler",
   "Zumo de naranja":"filler","Zumo de piña":"filler","Zumo de arándanos":"filler",
@@ -1243,6 +1290,10 @@ const INGR_GROUP = {
   "Sirope":"sweet","Sirope amarena":"sweet","Sirope de agave":"sweet",
   "Azúcar líquido":"sweet","Sirope de vainilla":"sweet","Sirope falernum":"sweet",
   "Sirope pandán":"sweet","Jalea de naranja":"sweet",
+  "Arándanos":"fruit","Fresa":"fruit","Piña":"fruit","Fruta de la pasión":"fruit",
+  "Puré de fruta de la pasión":"fruit","Lichee":"fruit","Frutos rojos":"fruit",
+  "Manzana verde":"fruit","Calabaza asada":"fruit","Maracuyá":"fruit",
+  "Frutas tropicales":"fruit","Lima":"fruit","Naranja":"fruit",
 };
 const GARNISHMENTS = new Set([
   "Hierbabuena","Albahaca","Menta","Romero","Tomillo","Perejil",
