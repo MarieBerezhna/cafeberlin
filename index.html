@@ -12,6 +12,10 @@ h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#e8e6e1}
 .tabs-scroll{overflow-x:auto;padding-bottom:4px;margin-bottom:1rem}
 .tabs{display:flex;gap:4px;width:max-content;background:#1e1d1a;border-radius:10px;padding:4px}
 .tab{padding:6px 12px;border-radius:7px;border:none;background:transparent;font-size:13px;color:#7a7875;cursor:pointer;white-space:nowrap}
+.tab-info{position:relative;font-size:11px;opacity:.6;cursor:pointer;vertical-align:middle;margin-left:2px}
+.tab-info:hover,.tab-info.open{opacity:1}
+.tab-tooltip{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:260px;background:#2a2926;border:0.5px solid rgba(232,230,225,0.2);border-radius:10px;padding:10px 12px;font-size:12px;color:#c8c5bf;line-height:1.6;text-align:left;z-index:100;white-space:normal;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.tab-info:hover .tab-tooltip,.tab-info.open .tab-tooltip{display:block}
 .tab:hover{color:#e8e6e1}
 .tab.active{background:#2a2926;color:#e8e6e1;font-weight:500;border:0.5px solid rgba(232,230,225,0.15)}
 .filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem;align-items:center}
@@ -220,17 +224,17 @@ const RAW = [
    prices:[{label:"cóctel",p:9}]},
   {cat:"Sin Alcohol",name:"Virgin Lady",hasIngr:true,ingr:["Tanqueray 0.0","Frutos rojos","Lima"],
    prices:[{label:"cóctel",p:9}]},
-  {cat:"Spritz",name:"Hugo Spritz",hasIngr:true,ingr:["Bols Saúco","Cava","Soda","Hierbabuena"],
+  {cat:"Spritz",name:"Hugo Spritz",hasIngr:true,doses:{"Bols Saúco":"2 oz","Cava":"3 oz","Soda":"1 oz"},ingr:["Bols Saúco","Cava","Soda","Hierbabuena"],
    prices:[{label:"copa",p:10}]},
-  {cat:"Spritz",name:"Aperol Spritz",hasIngr:true,ingr:["Aperol","Cava","Soda"],
+  {cat:"Spritz",name:"Aperol Spritz",hasIngr:true,doses:{"Aperol":"2 oz","Cava":"3 oz","Soda":"1 oz"},ingr:["Aperol","Cava","Soda"],
    prices:[{label:"copa",p:8}]},
-  {cat:"Spritz",name:"Yuzu Spritz",hasIngr:true,ingr:["Licor yuzu","Cava","Soda"],
+  {cat:"Spritz",name:"Yuzu Spritz",hasIngr:true,doses:{"Licor yuzu":"2 oz","Cava":"3 oz","Soda":"1 oz"},ingr:["Licor yuzu","Cava","Soda"],
    prices:[{label:"copa",p:8}]},
-  {cat:"Spritz",name:"Chambord Spritz",hasIngr:true,ingr:["Chambord","Cava","Soda"],
+  {cat:"Spritz",name:"Chambord Spritz",hasIngr:true,doses:{"Chambord":"2 oz","Cava":"3 oz","Soda":"1 oz"},ingr:["Chambord","Cava","Soda"],
    prices:[{label:"copa",p:8}]},
-  {cat:"Spritz",name:"Campari Spritz",hasIngr:true,ingr:["Campari","Cava","Soda"],
+  {cat:"Spritz",name:"Campari Spritz",hasIngr:true,doses:{"Campari":"2 oz","Cava":"3 oz","Soda":"1 oz"},ingr:["Campari","Cava","Soda"],
    prices:[{label:"copa",p:8}]},
-  {cat:"Spritz",name:"Sarti Rosa Spritz",hasIngr:true,ingr:["Sarti Rosa","Cava","Soda"],
+  {cat:"Spritz",name:"Sarti Rosa Spritz",hasIngr:true,doses:{"Sarti Rosa":"2 oz","Cava":"3 oz","Soda":"1 oz"},ingr:["Sarti Rosa","Cava","Soda"],
    prices:[{label:"copa",p:8}]},
   {cat:"Jarras",name:"Agua de Valencia",hasIngr:true,ingr:["Gin Tanqueray","Triple Sec Bols","Licor mandarina MB","Cava","Zumo de naranja","Azúcar líquido"],
    prices:[{label:"copa",p:7}]},
@@ -573,6 +577,9 @@ const UNIQUE_PRICES = [...new Set(ALL_PRICES_FLAT)];
 const CATS = ["Todo",...[...new Set(RAW.map(x=>x.cat))]];
 const AUTOR_CAT    = "Cócteles de autor";
 const CLASICA_CAT  = "Coctelería clásica";
+const CAT_DESCRIPTIONS = {
+  "Spritz": "Un spritz es un famoso y refrescante cóctel de origen italiano que se sirve principalmente como aperitivo. Su receta clásica combina tres elementos fundamentales: vino blanco espumoso (generalmente Prosecco), un licor amargo (bitter) y un chorrito de agua con gas (soda). La regla de oro del cóctel italiano clásico sigue la proporción 3-2-1: tres partes de prosecco o cava, 2 partes de bitter y 1 de soda.",
+};
 const AUTOR_FAMILIES  = [...new Set(RAW.filter(x=>x.cat===AUTOR_CAT  && x.family).map(x=>x.family))];
 const CLASICA_FAMILIES = [...new Set(RAW.filter(x=>x.cat===CLASICA_CAT && x.family).map(x=>x.family))];
 // badge colors per section type
@@ -1097,8 +1104,9 @@ function renderOverview(){
   document.getElementById('area').innerHTML = `
     <div style="background:#1a1917;border:1px solid rgba(224,174,107,0.3);border-radius:16px;padding:20px;margin-bottom:16px;text-align:center">
       ${catImg ? `<img src="${catImg}" alt="${cat}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;margin-bottom:12px">` : ''}
-      <div style="font-size:22px;font-weight:700;color:#e8e6e1;margin-bottom:4px">${cat}</div>
+      <div style="font-size:22px;font-weight:700;color:#e8e6e1;margin-bottom:4px">${cat}${CAT_DESCRIPTIONS[cat] ? ` <span class="tab-info">ⓘ<span class="tab-tooltip">${CAT_DESCRIPTIONS[cat]}</span></span>` : ''}</div>
       <div style="font-size:13px;color:#9a9793;margin-bottom:14px">${items.length} ${items.length===1?'ítem':'ítems'} en esta sección</div>
+      ${CAT_DESCRIPTIONS[cat] ? '' : ''}
       <button class="pri" style="width:100%;padding:14px;border:none;border-radius:10px;background:#e8e6e1;color:#0f0e0c;font-size:16px;font-weight:700;cursor:pointer" onclick="startLearnMain()">¡Empezar repaso! →</button>
     </div>
     <div style="font-size:12px;color:#9a9793;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-left:2px">📋 Repasa antes de empezar</div>
@@ -1536,6 +1544,14 @@ function renderLearnEnd(){
 }
 
 // Override keydown to also work in learn mode
+// Tap handler for .tab-info tooltips on mobile
+document.addEventListener('click', function(e){
+  const info = e.target.closest('.tab-info');
+  if(info){ info.classList.toggle('open'); return; }
+  // Close any open tooltips when tapping elsewhere
+  document.querySelectorAll('.tab-info.open').forEach(el=>el.classList.remove('open'));
+});
+
 document.addEventListener('keydown', function(e) {
   if (e.code === 'Space' || e.key === ' ' || e.code === 'Enter' || e.key === 'Enter') {
     e.preventDefault();
